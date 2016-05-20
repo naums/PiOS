@@ -136,7 +136,7 @@ copyImageOutAlpha:
  * \param r0 x
  * \param r1 y
  **/
-copyImage:
+/*copyImage:
     push {lr}
     push {r5, r6, r7, r8, r9, r10, r11, r12}
     
@@ -197,7 +197,7 @@ copyImage:
 copyImageOut:
     pop {r5, r6, r7, r8, r9, r10, r11, r12}
     pop {pc}
-
+*/
 /**
  * \brief sets the color of a pixel (x,y)
  * \param r0 x coordinate (will not be changed)

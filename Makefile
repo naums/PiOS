@@ -9,7 +9,7 @@
 # The toolchain to use. arm-none-eabi works, but there does exist 
 # arm-bcm2708-linux-gnueabi.
 #ARMGNU ?= $(CC)
-ARMGNU ?= arm-linux-gnueabihf
+ARMGNU ?= arm-none-eabi
 
 #ASOPTS=-march=arm -mcpu=arm1176jzf-s
 ASOPTS=-march=armv6 -mcpu=arm1176jzf-s #--mfpu=vfp
@@ -36,9 +36,14 @@ LINKER = kernel.ld
 
 # The names of all object files that must be generated. Deduced from the 
 # assembly code files in source.
-OBJECTS := $(patsubst $(SOURCE)%.s,$(BUILD)%.o,$(wildcard $(SOURCE)*.s))
+ASSRCS := $(patsubst $(SOURCE)%.s,$(BUILD)%.o,$(wildcard $(SOURCE)*.s))
 LIBCOBJ := $(patsubst $(SOURCE)libc/%.s, $(BUILD)%_libc.o, $(wildcard $(SOURCE)libc/*.s))
-COBJ := $(patsubst $(SOURCE)%.c, $(BUILD)%_c.o, $(wildcard $(SOURCE)*.c))
+CSRCS := $(patsubst $(SOURCE)%.c, $(BUILD)%_c.o, $(wildcard $(SOURCE)*.c))
+
+PROCESS := $(patsubst $(SOURCE)process/%.s,$(BUILD)%_process.o,$(wildcard $(SOURCE)process/*.s))
+PROCESSC := $(patsubst $(SOURCE)process/%.c,$(BUILD)%_process_c.o,$(wildcard $(SOURCE)process/*.c))
+
+OBJECTS = $(ASSRCS) $(LIBCOBJ) $(CSRCS) $(PROCESS) $(PROCESSC)
 
 # Rule to make everything.
 all: $(TARGET) $(LIST)
@@ -55,8 +60,8 @@ $(TARGET) : $(BUILD)output.elf
 	$(ARMGNU)-objcopy $(BUILD)output.elf -O binary $(TARGET) 
 
 # Rule to make the elf file.
-$(BUILD)output.elf : $(OBJECTS) $(COBJ) $(LIBCOBJ) $(LINKER)
-	$(ARMGNU)-ld --no-undefined $(OBJECTS) $(COBJ) $(LIBCOBJ) $(LDOPTS) -Map $(MAP) -o $(BUILD)output.elf -T $(LINKER)
+$(BUILD)output.elf : $(OBJECTS) $(LINKER)
+	$(ARMGNU)-ld --no-undefined $(OBJECTS) $(LDOPTS) -Map $(MAP) -o $(BUILD)output.elf -T $(LINKER)
 
 # Rule to make the object files.
 $(BUILD)%.o: $(SOURCE)%.s $(BUILD)
@@ -67,6 +72,12 @@ $(BUILD)%_libc.o: $(SOURCE)libc/%.s $(BUILD)
 
 $(BUILD)%_c.o: $(SOURCE)%.c $(BUILD)
 	$(ARMGNU)-gcc -I $(SOURCE) $(CFLAGS)  $< -c -o $@
+
+$(BUILD)%_process_c.o: $(SOURCE)process/%.c $(BUILD)
+	$(ARMGNU)-gcc -I $(SOURCE) $(CFLAGS) $< -c -o $@ 
+$(BUILD)%_process.o: $(SOURCE)process/%.s $(BUILD)
+	$(ARMGNU)-as -I $(SOURCE) $(ASOPTS) $< -c -o $@ 
+
 
 $(BUILD):
 	mkdir $@

@@ -34,6 +34,14 @@ SECTIONS {
 		*(.rodata)
 	}
 
+    .COMMON : {
+        *(COMMON)
+    }
+
+    .bss : {
+        *(.bss)
+    }
+
 	/*
 	* Finally comes everything else. A fun trick here is to put all other 
 	* sections into this section, which will be discarded by default.

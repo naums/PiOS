@@ -38,7 +38,7 @@ struct pcb* schedule ( struct pcb* (*func) ( struct pcb*, struct pcb* ), void (*
     {
         if (t2->state != BLOCKED)
         {
-            tmp = func ( tmp, &processes[i] );
+            tmp = func ( tmp, t2 );
         }
         t2++;
     }

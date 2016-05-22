@@ -22,10 +22,10 @@ int createProcess ( void* pc )
     p->priority = 0;
     p->arrival = 0;
     
-    p->id = (numProcesses+1);
-    processes[(numProcesses+1)].id=-1;
-    p->sp = findNewStack ();
     numProcesses++;
+    p->id = numProcesses;
+    processes[numProcesses].id=-1;
+    p->sp = findNewStack ();
     
     return p->id;
 }
@@ -33,10 +33,22 @@ int createProcess ( void* pc )
 struct pcb* schedule ( struct pcb* (*func) ( struct pcb*, struct pcb* ), void (*winning) (struct pcb*) )
 {
     struct pcb* tmp = processes;
+    struct pcb* t2 = processes;
     for (int i=0; i<numProcesses; i++)
     {
-        tmp = func ( tmp, &processes[i] );
+        if (t2->state != BLOCKED)
+        {
+            tmp = func ( tmp, &processes[i] );
+        }
+        t2++;
     }
-    winning ( tmp );
-    return tmp;
+    if (tmp->id > 0)
+    {
+        winning ( tmp );
+        return tmp;
+    }
+    else
+    {
+        return NULL;
+    }
 }

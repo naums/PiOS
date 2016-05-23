@@ -6,6 +6,7 @@
 
 .section .init
 .globl _start
+.globl blinkloop
 
 _start:
     mov sp, #0x8000
@@ -49,113 +50,24 @@ _start:
     ldr r0, =0xff000000
     bl setForeColor
     
-    /*mov r5, #10
-    mov r6, #65
-    $characterloop:
-        mov r0, r6
-        mov r1, r5
-        mov r2, #8
-        bl drawCharacter
-        
-        add r5, #10
-        add r6, #1
-        cmp r6, #90
-        bls $characterloop;*/
- /*
-    mov r1, #0x63
-    push {r1}
-    mov r1, #42
-    push {r1, r1}
-    ldr r1, =osname
-    push {r1}
-    
-    ldr r0,=mystring
-    bl printf   */
-    
-    ldr r0, =targetstring
-    ldr r1, =osname
-    bl strcpy
-    
-    mov r1, #10
-    mov r2, #10
-    bl printString
-    /*
-    ldr r0, =osname
-    bl strlen
-    
-    mov r2, r0
-    ldr r0, =targetstring
-    mov r1, #0x31
-    
-    bl memset
-    mov r1, #10
-    mov r2, #30
-    bl printString
-    
-    ldr r0, =osname
-    bl strlen
-    
-    mov r2, r0
-    ldr r0, =targetstring
-    ldr r1, =osname
-    bl strncpy
-    
-    mov r1, #10
-    mov r2, #50
-    bl printString
-    
-    
-    ldr r0, =osname
-    mov r1, #10
-    mov r2, #70
-    bl printString
-    
-    ldr r0, =targetstring
-    ldr r1, =osname
-    bl strcat
-    
-    mov r1, #10
-    mov r2, #90
-    bl printString
-
-    ldr r0, =osname
-    mov r1, #10
-    mov r2, #150
-    bl printString
-
-    ldr r0, =targetstring
-    ldr r1, =mystring
-    mov r2, #14
-    bl memcpy
-    
-    mov r1, #10
-    mov r2, #110
-    bl printString
-    
-    ldr r0, =targetstring
-    ldr r1, =osname
-    bl strcmp
-    
-    bl itoa
-    
-    mov r1, #10
-    mov r2, #130
-    bl printString
-
     ldr r0, =mystring
     mov r1, #10
-    mov r2, #200
+    mov r2, #500
     bl printString
     
-    */
-    mov r0, #1000
-    mov r1, #100
-    bl copyImageAlpha
+    ldr r0, =_p1
+    bl createProcess
+    
+    ldr r0, =_p2
+    bl createProcess
+    
+    bl startProcess
     
     bl cmain
 
     b blinkloop;
     // blinks the LED when an error has occured while initiating the framebuffer
+    
 blinkloop:
     mov r0, #16
     mov r1, #1
@@ -172,9 +84,46 @@ blinkloop:
     bl wait
     b blinkloop    
     
+_p1:
+    mov r5, #10
+process1:
+    
+    mov r0, #0x61
+    mov r1, r5
+    mov r2, #100
+    
+    bl drawCharacter
+    
+    add r5, #10
+    
+    mov r0, #1
+    bl wait
+    
+    bl yield
+    b process1
+    
+_p2:
+    mov r5, #10
+process2:
+    
+    mov r0, #0x62
+    mov r1, r5
+    mov r2, #200
+    
+    bl drawCharacter
+    
+    add r5, #10
+    
+    mov r0, #1
+    bl wait
+    
+    bl yield
+    b process2
+    
+  
 .section .data
 mystring:
-    .ascii "Hello world from %s.\n Booting slowly and making the text very long,\r so hopefully I get a bloody linebreak,\n if the code works alright. \n\rAlso: some numbers: %d %x and a c-Character: %c. \nBooting: 100 %%\0"
+    .ascii "Hello world\0"
     .zero 1
 osname:
     .ascii "pilotOS\0"

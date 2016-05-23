@@ -32,12 +32,12 @@ struct pcb
     void* sp;                ///< saved stack pointer after saving the context
 };
 
-/// pointer to the pcb of the currently running process
-struct pcb* running=NULL;
 /// list of processes in the system (32 max)
 struct pcb processes[MAX_PROCESSES];
 /// the number of processes in the system
 unsigned int numProcesses=0;
+/// pointer to the pcb of the currently running process
+struct pcb* running=&processes[0];
 
 /**
  * \brief saves the context, recollects the context of the next process and continues with it
@@ -51,6 +51,7 @@ int dispatch ();
 /**
  * \brief determines the next process for execution with a comparison-function
  * \param[in] func the function for comparing two processes
+ * \param[in] winning the function to do for the winning process
  **/
 struct pcb* schedule ( struct pcb* (*func) ( struct pcb*, struct pcb* ), void (*winning) (struct pcb*) );
 

@@ -17,8 +17,6 @@ delay:
     push {lr}
     push {r5}
     mov r5, r0
-    // using ldr, not 'mov r0, #1000000' because immediate
-    // is not big enough to hold decimal 1000000
 delay_inner:
     ldr r0, =1000000
     cmp r5, #0    

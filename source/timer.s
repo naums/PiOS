@@ -8,6 +8,40 @@ counteraddr:
     ldr r0, =0x20003000
     mov pc, lr
 
+
+/**
+ * \brief sets a compare-register of the hardware-timer to a specific 32-bit statement
+ * \param r0 -> value for the compare-register
+ * \param r1 -> channel of the timer
+ * \note will not reset the timer
+ **/
+pios_timer_cmpset:
+    push {lr}
+    mov r2, r0
+    bl counteraddr
+    add r0, r0, #0x0c
+    add r0, r0, r1, LSL #4
+    str r1, [r0]
+    pop {pc}
+
+pios_timer_read:
+    push {lr}
+    bl counteraddr
+    ldrd r0, r1, [r0, #4]
+    pop {pc}
+
+pios_timer_offset:
+    push {lr}
+    mov r2, r0
+    mov r3, r1
+    
+    bl pios_timer_read
+    
+    subs r0, r0, r2 // substract the new value from the older one with carry setting
+    sbc r1, r1, r3  // substract the new value (higher 32Bits) from the older ones with carry.
+    
+    pop {pc}
+
 /**
  * \brief waits for the given amount of seconds
  * \param r0 amount of seconds 
@@ -52,4 +86,4 @@ delay_ms_inner:
     bhi delay_ms_inner
     pop {r6, r7}
     pop {pc}
- 
+

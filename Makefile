@@ -11,13 +11,12 @@ LIB=lib/
 
 # OPTIONS for AS, CC and LD
 # todo: tweak for RPI, RPIB+, RPI2, RPI3
-ASOPTS=-march=armv6 -mcpu=arm1176jzf-s -g
+ASOPTS=-g -march=armv6 -mcpu=arm1176jzf-s -g -mfloat-abi=softfp -mhard-float -mfpu=vfp -marm
 LDOPTS=
-CFLAGS=-std=c99 -Wall -pedantic -g
+CFLAGS=-std=c99 -Wall -pedantic -g -march=armv6 -mcpu=arm1176jzf-s -g -mfloat-abi=softfp -mhard-float -mfpu=vfp -marm
 
-NEWLIB_PATH=newlib-cygwin
-NEWLIB=$(LIB)$(NEWLIB_PATH)
-NEWLIB_PREP=$(NEWLIB)/newlib/libc/sys/arm/
+LIBC=lib/libc.a
+MUSL=lib/musl/
 
 # KERNELNAME
 KRNL=kernel
@@ -42,16 +41,15 @@ rpibp: PLAT=PLATFORM_RPIBP
 rpibp: $(BUILD) $(KRNL).img 
 
 # build newlib
-newlib: $(BUILD) $(LIB)newlib.a
-$(LIB)newlib.a: $(NEWLIB_PREP)syscalls.c.orig $(NEWLIB_PREP)libcfunc.c.orig $(NEWLIB_PREP)crt0.S.orig
-	touch $(NEWLIB_PREP)syscalls.c $(NEWLIB_PREP)libcfunc.c $(NEWLIB_PREP)crt0.S
-	cd $(LIB) &&\
-		$(NEWLIB_PATH)/configure --target=arm-none-eabi --host=x86_64-pc-linux-gnu --disable-multilibs 
-	make -C $(LIB)
+musl: $(BUILD) $(LIB)libc.a
+$(LIB)libc.a: $
+	cd $(MUSL) &&
+	    CC="$(CC)" \
+	    CFLAGS="$(CFLAGS)" \
+		./configure --target=arm-none-eabi --disable-shared &&\
+	    make
+	cp $(MUSL)$(LIB) $(LIB)
 
-# move some files away, so newlib won't use them
-$(NEWLIB_PREP)%.orig:
-	mv $< $@
 
 # make a listing from the kernel.elf file
 dump: $(BUILD) $(KRNL).elf $(KRNL).list

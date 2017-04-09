@@ -11,12 +11,13 @@ LIB=lib/
 
 # OPTIONS for AS, CC and LD
 # todo: tweak for RPI, RPIB+, RPI2, RPI3
-ASOPTS=-g -march=armv6 -mcpu=arm1176jzf-s -g -mfloat-abi=softfp -mhard-float -mfpu=vfp -marm
+ASOPTS=-g -march=armv6 -g -mfloat-abi=softfp -mhard-float -mfpu=vfp -marm -Os #-mcpu=arm1176jzf-s
 LDOPTS=
-CFLAGS=-std=c99 -Wall -pedantic -g -march=armv6 -mcpu=arm1176jzf-s -g -mfloat-abi=softfp -mhard-float -mfpu=vfp -marm
+CFLAGS=-std=c99 -Wall -pedantic -g -march=armv6 -g -mfloat-abi=softfp -mhard-float -mfpu=vfp -marm -Os #-mcpu=arm1176jzf-s
 
 LIBC=lib/libc.a
-MUSL=$(LIB)/musl/
+LIBM=lib/libm.a
+MUSL=$(LIB)musl/
 
 # KERNELNAME
 KRNL=kernel
@@ -43,13 +44,18 @@ rpibp: $(BUILD) $(KRNL).img
 # build musl libc
 musl: $(BUILD) $(LIBC)
 
+musl_rebuild: $(LIBC) $(LIBM)
+	rm $(LIBC) $(LIBM)
+	cd $(MUSL) && make clean
+
 $(LIBC): 
-	cd $(MUSL) &&
+	cd $(MUSL) &&\
 	    CC="$(CC)" \
 	    CFLAGS="$(CFLAGS)" \
 		./configure --target=arm-none-eabi --disable-shared &&\
 	    make
-	cp $(MUSL)$(LIBC) $(LIBC)
+	cp $(MUSL)$(LIBM) $(LIBM)
+	cp $(MUSL)$(LIBM) $(LIBM)
 
 
 # make a listing from the kernel.elf file

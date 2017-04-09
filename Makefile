@@ -17,7 +17,9 @@ CFLAGS=-std=c99 -Wall -pedantic -g -march=armv6 -g -mfloat-abi=softfp -mhard-flo
 
 LIBC=lib/libc.a
 LIBM=lib/libm.a
-MUSL=$(LIB)musl/
+NEWLIB_PATH=newlib-cygwin
+NEWLIB=$(LIB)$(NEWLIB_PATH)
+NEWLIB_PREP=$(NEWLIB)/newlib/libc/sys/arm/
 
 # KERNELNAME
 KRNL=kernel
@@ -41,22 +43,19 @@ rpi2: $(BUILD) $(KRNL).img
 rpibp: PLAT=PLATFORM_RPIBP 
 rpibp: $(BUILD) $(KRNL).img 
 
-# build musl libc
-musl: $(BUILD) $(LIBC)
+# build newlib
+newlib: $(BUILD) $(LIB)newlib.a
+$(LIBC): $(NEWLIB_PREP)syscalls.c.orig $(NEWLIB_PREP)libcfunc.c.orig $(NEWLIB_PREP)crt0.S.orig
+	touch $(NEWLIB_PREP)syscalls.c $(NEWLIB_PREP)libcfunc.c $(NEWLIB_PREP)crt0.S
+	cd $(LIB)build &&\
+		CC=$(CC) \
+		CFLAGS=$(CFLAGS) \
+		$(NEWLIB_PATH)/configure --target=arm-none-eabi --host=x86_64-pc-linux-gnu --disable-multilibs --disable-shared
+	make -C ../$(NEWLIB_PATH)
 
-musl_rebuild: $(LIBC) $(LIBM)
-	rm $(LIBC) $(LIBM)
-	cd $(MUSL) && make clean
-
-$(LIBC): 
-	cd $(MUSL) &&\
-	    CC="$(CC)" \
-	    CFLAGS="$(CFLAGS)" \
-		./configure --target=arm-none-eabi --disable-shared &&\
-	    make
-	cp $(MUSL)$(LIBM) $(LIBM)
-	cp $(MUSL)$(LIBM) $(LIBM)
-
+# move some files away, so newlib won't use them
+$(NEWLIB_PREP)%.orig:
+	mv $< $@
 
 # make a listing from the kernel.elf file
 dump: $(BUILD) $(KRNL).elf $(KRNL).list

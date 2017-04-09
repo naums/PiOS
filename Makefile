@@ -16,7 +16,7 @@ LDOPTS=
 CFLAGS=-std=c99 -Wall -pedantic -g -march=armv6 -mcpu=arm1176jzf-s -g -mfloat-abi=softfp -mhard-float -mfpu=vfp -marm
 
 LIBC=lib/libc.a
-MUSL=lib/musl/
+MUSL=$(LIB)/musl/
 
 # KERNELNAME
 KRNL=kernel
@@ -40,15 +40,16 @@ rpi2: $(BUILD) $(KRNL).img
 rpibp: PLAT=PLATFORM_RPIBP 
 rpibp: $(BUILD) $(KRNL).img 
 
-# build newlib
-musl: $(BUILD) $(LIB)libc.a
-$(LIB)libc.a: $
+# build musl libc
+musl: $(BUILD) $(LIBC)
+
+$(LIBC): 
 	cd $(MUSL) &&
 	    CC="$(CC)" \
 	    CFLAGS="$(CFLAGS)" \
 		./configure --target=arm-none-eabi --disable-shared &&\
 	    make
-	cp $(MUSL)$(LIB) $(LIB)
+	cp $(MUSL)$(LIBC) $(LIBC)
 
 
 # make a listing from the kernel.elf file

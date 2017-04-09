@@ -11,7 +11,8 @@ LIB=lib/
 
 # OPTIONS for AS, CC and LD
 # todo: tweak for RPI, RPIB+, RPI2, RPI3
-ASOPTS=-march=armv6 -g -mfpu=vfp -mcpu=arm1176jzf-s
+CPU=arm1176jzf-s
+ASOPTS=-march=armv6 -g -mfpu=vfp -mcpu=$(CPU)
 LDOPTS=
 CFLAGS=-std=c99 -Wall -pedantic -g -march=armv6 -mfloat-abi=softfp -mhard-float -mfpu=vfp -marm -Os #-mcpu=arm1176jzf-s
 

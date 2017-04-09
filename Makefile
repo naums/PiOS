@@ -11,9 +11,9 @@ LIB=lib/
 
 # OPTIONS for AS, CC and LD
 # todo: tweak for RPI, RPIB+, RPI2, RPI3
-ASOPTS=-g -march=armv6 -g -mfloat-abi=softfp -mhard-float -mfpu=vfp -marm -Os #-mcpu=arm1176jzf-s
+ASOPTS=-march=armv6 -g -mfpu=vfp -mcpu=arm1176jzf-s
 LDOPTS=
-CFLAGS=-std=c99 -Wall -pedantic -g -march=armv6 -g -mfloat-abi=softfp -mhard-float -mfpu=vfp -marm -Os #-mcpu=arm1176jzf-s
+CFLAGS=-std=c99 -Wall -pedantic -g -march=armv6 -mfloat-abi=softfp -mhard-float -mfpu=vfp -marm -Os #-mcpu=arm1176jzf-s
 
 LIBC=lib/libc.a
 LIBM=lib/libm.a
@@ -29,7 +29,7 @@ OBJECTS := $(patsubst $(SOURCE)%.s,$(BUILD)%.o, $(patsubst $(SOURCE)%.c,$(BUILD)
 
 # Rule to make the RPI1-version.
 all: 
-	make rpi
+	$(MAKE)  rpi
 	
 # RPI
 rpi: PLAT=PLATFORM_RPI 
@@ -44,18 +44,15 @@ rpibp: PLAT=PLATFORM_RPIBP
 rpibp: $(BUILD) $(KRNL).img 
 
 # build newlib
-newlib: $(BUILD) $(LIB)newlib.a
-$(LIBC): $(NEWLIB_PREP)syscalls.c.orig $(NEWLIB_PREP)libcfunc.c.orig $(NEWLIB_PREP)crt0.S.orig
-	touch $(NEWLIB_PREP)syscalls.c $(NEWLIB_PREP)libcfunc.c $(NEWLIB_PREP)crt0.S
-	cd $(LIB)build &&\
-		CC=$(CC) \
-		CFLAGS=$(CFLAGS) \
-		$(NEWLIB_PATH)/configure --target=arm-none-eabi --host=x86_64-pc-linux-gnu --disable-multilibs --disable-shared
-	make -C ../$(NEWLIB_PATH)
+newlib: $(BUILD) $(LIB)libc.a
+$(LIBC): 
+	cd $(LIB)build && \
+		../$(NEWLIB_PATH)/configure --target=arm-none-eabi --host=x86_64-pc-linux-gnu --disable-multilib --disable-shared --enable-target-optspace --enable-newlib-hw-fp --with-float=hard --with-cpu=arm1176jzf-s --with-fpu=vfp --disable-newlib-supplied-syscalls && \
+		$(MAKE) 
 
-# move some files away, so newlib won't use them
-$(NEWLIB_PREP)%.orig:
-	mv $< $@
+newlib_clean:
+	rm -r $(LIB)build
+	mkdir $(LIB)build
 
 # make a listing from the kernel.elf file
 dump: $(BUILD) $(KRNL).elf $(KRNL).list

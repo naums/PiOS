@@ -46,7 +46,7 @@ newlib: $(BUILD) $(LIB)newlib.a
 $(LIB)newlib.a: $(NEWLIB_PREP)syscalls.c.orig $(NEWLIB_PREP)libcfunc.c.orig $(NEWLIB_PREP)crt0.S.orig
 	touch $(NEWLIB_PREP)syscalls.c $(NEWLIB_PREP)libcfunc.c $(NEWLIB_PREP)crt0.S
 	cd $(LIB) &&\
-		$(NEWLIB_PATH)/configure --target=armv6 --host=x86_64-pc-linux-gnu --disable-multilibs 
+		$(NEWLIB_PATH)/configure --target=arm-none-eabi --host=x86_64-pc-linux-gnu --disable-multilibs 
 	make -C $(LIB)
 
 # move some files away, so newlib won't use them

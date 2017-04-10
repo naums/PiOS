@@ -14,8 +14,8 @@ LIB=lib/
 # OPTIONS for AS, CC and LD
 # todo: tweak for RPI, RPIB+, RPI2, RPI3
 CPU=arm1176jzf-s
-CPUINFO=-mcpu=$(CPU) -mfpu=vfp #-march=armv6
-CCPU=-marm -mfloat-abi=hard
+CPUINFO=-mcpu=$(CPU) #-mfpu=vfp #-march=armv6
+CCPU=-marm -mfloat-abi=softfp
 
 ASOPTS=-g $(CPUINFO)
 LDOPTS=
@@ -54,7 +54,10 @@ rpibp: $(BUILD) $(KRNL).img
 newlib: $(BUILD) $(LIBC)
 $(LIB)build/arm-none-eabi/newlib/libc.a: 
 	cd $(LIB)build && \
-		../$(NEWLIB_PATH)/configure --target=arm-none-eabi --host=x86_64-pc-linux-gnu --disable-multilib --disable-shared --enable-target-optspace --enable-newlib-hw-fp --with-float=hard --with-cpu=arm1176jzf-s --with-fpu=vfp --disable-newlib-supplied-syscalls && \
+		TARGET_CFLAGS="$(CPUINFO) $(CCPU)"\
+		TARGET_CC="arm-none-eabi-gcc"\
+		TARGET_AR="arm-none-eabi-ar"\
+		../$(NEWLIB_PATH)/configure --target=arm-none-eabi --enable-newlib-hw-fp --with-float=hard --with-cpu=arm1176jzf-s --with-fpu=vfp --disable-multilib --disable-shared --enable-target-optspace  --disable-newlib-supplied-syscalls && \
 		$(MAKE) 
 
 $(LIBC): $(LIB)build/arm-none-eabi/newlib/libc.a

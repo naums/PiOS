@@ -14,8 +14,8 @@ LIB=lib/
 # OPTIONS for AS, CC and LD
 # todo: tweak for RPI, RPIB+, RPI2, RPI3
 CPU=arm1176jzf-s
-CPUINFO=-mcpu=$(CPU) #-mfpu=vfp #-march=armv6
-CCPU=-marm #-mfloat-abi=softfp -mhard-float
+CPUINFO=-mcpu=$(CPU) -mfpu=vfp #-march=armv6
+CCPU=-marm -mfloat-abi=hard
 
 ASOPTS=-g $(CPUINFO)
 LDOPTS=
@@ -51,19 +51,20 @@ rpibp: PLAT=PLATFORM_RPIBP
 rpibp: $(BUILD) $(KRNL).img 
 
 # build newlib
-newlib: $(BUILD) $(LIB)libc.a
+newlib: $(BUILD) $(LIBC)
 $(LIB)build/arm-none-eabi/newlib/libc.a: 
 	cd $(LIB)build && \
 		../$(NEWLIB_PATH)/configure --target=arm-none-eabi --host=x86_64-pc-linux-gnu --disable-multilib --disable-shared --enable-target-optspace --enable-newlib-hw-fp --with-float=hard --with-cpu=arm1176jzf-s --with-fpu=vfp --disable-newlib-supplied-syscalls && \
 		$(MAKE) 
 
-$(LIBC):
+$(LIBC): $(LIB)build/arm-none-eabi/newlib/libc.a
 	cp $(LIB)build/arm-none-eabi/newlib/libc.a $(LIBC)
 	cp $(LIB)build/arm-none-eabi/newlib/libm.a $(LIBM)
 
 newlib_clean:
 	rm -r $(LIB)build
 	mkdir $(LIB)build
+	rm $(LIBC) $(LIBM)
 
 # make a listing from the kernel.elf file
 dump: $(BUILD) $(KRNL).elf $(KRNL).list

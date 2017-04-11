@@ -31,7 +31,7 @@ start:
     
     ldr r0, =1920
     ldr r1, =1080
-    mov r2, #32
+    mov r2, #24
     bl framebufferInit
     // returnvalue is frameinfo-address
 	

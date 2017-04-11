@@ -33,7 +33,7 @@ SECTIONS {
 
 	.rodata : {
 		*(.rodata)
-		*(.rodata.str1.1)
+		*(.rodata.*)
 	}
 
     .COMMON : {

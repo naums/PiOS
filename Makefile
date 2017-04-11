@@ -90,13 +90,13 @@ $(KRNL).list : $(KRNL).elf
 $(KRNL).img : $(KRNL).elf
 	$(ARM)-objcopy $(KRNL).elf -O binary $(KRNL).img
 $(KRNL).elf : $(OBJECTS) $(LINKER)
-	$(ARM)-ld --no-undefined $(OBJECTS) $(LDOPTS) -Map $(KRNL).map -o $(KRNL).elf -L $(LIB) -lc -lm -L $(ARMGCCLIBPATH) -lgcc -T $(KRNL).ld
+	$(ARM)-ld --no-undefined $(OBJECTS) $(LDOPTS) -Map $(KRNL).map -o $(KRNL).elf -L $(LIB) -lc -lm -lyailfc -L $(ARMGCCLIBPATH) -lgcc -T $(KRNL).ld
 
 # built objectfiles from assembler or c
 $(BUILD)%.o: $(SOURCE)%.s
 	$(AS) -I $(SOURCE) $(ASOPTS) $< -o $@
 $(BUILD)%.o: $(SOURCE)%.c
-	$(CC) -D$(PLAT) -I $(SOURCE) $(CFLAGS)  $< -c -o $@
+	$(CC) -D$(PLAT) -I $(SOURCE) -I $(LIB)yailfc/src $(CFLAGS) $< -c -o $@
 
 # create the build-folder
 $(BUILD):

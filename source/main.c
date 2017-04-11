@@ -1,47 +1,25 @@
+#include "uart.h"
 
-#include <stdint.h>
+#include <stdio.h>
 
-extern void printString ( const char*, int, int );
-extern uint32_t* frameBuffer;
-extern const char* hex32 ( uint32_t );
-
-struct framebufferinfo
+int _write ( int fd, const char* ptr, int size )
 {
-	uint32_t fb_width;
-	uint32_t fb_height;
-	uint32_t vfb_width;
-	uint32_t vfb_height;
-	uint32_t gpu_pitch;
-	uint32_t color_depth;
-	uint32_t x;
-	uint32_t y;
-	uint32_t fb_ptr;
-	uint32_t fb_size;
-};
-
-extern struct framebufferinfo framebufferInfo;
-
-void drawCircle ( unsigned int x, unsigned int y, uint32_t* fb, unsigned int diameter )
-{
-	uint32_t width = framebufferInfo.fb_width;
-	uint32_t height = framebufferInfo.fb_height;
-	
-	for (unsigned int i=y; i<(y+diameter); i++)
-	{
-		for (unsigned int j=x; j<(x+diameter); j++)
-		{
-			fb[(i*width) + j]=0;
-		}
-	}
-}	
-
-int cmain()
-{
-	uint32_t* fb = frameBuffer;
-
-	drawCircle ( 120, 240, fb, 64 );
-	printString ( "Hello World.\nI'm Jimbob!\n\0", 160, 206 );
+    uart_puts ( ptr );
 }
 
+extern void blinkloop();
 
-
+int main ()
+{
+    uart_init();
+    
+    uart_puts("\r\nHello Lads!\r\n\0");
+    
+    // print the header and some build-info    
+    //uart_puts("\r\Booting PiOS newlib :)\r\n");
+    char str[]="\r\nBooting PiOS newlib :)\r\n\0";
+    //write (0, str, strlen(str));
+    printf ("Hello Lads, How are you? %d, 0x%03x\r\n", 123, 0xec );
+    
+    blinkloop();
+}

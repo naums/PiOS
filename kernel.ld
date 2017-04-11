@@ -21,6 +21,7 @@ SECTIONS {
 	*/
 	.text : {
 		*(.text)
+		*(.text.startup)
 	}
 	
 	/* 
@@ -32,6 +33,7 @@ SECTIONS {
 
 	.rodata : {
 		*(.rodata)
+		*(.rodata.str1.1)
 	}
 
     .COMMON : {

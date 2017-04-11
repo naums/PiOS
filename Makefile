@@ -1,90 +1,97 @@
-###############################################################################
-#	makefile
-#	 by Alex Chadwick
-#   see http://www.cl.cam.ac.uk/projects/raspberrypi/tutorials/os/
-#
-#	A makefile script for generation of raspberry pi kernel images.
-###############################################################################
+# COMPILERS and stuff 
+ARM = arm-none-eabi
+CC = $(ARM)-gcc
+AS = $(ARM)-as
 
-# The toolchain to use. arm-none-eabi works, but there does exist 
-# arm-bcm2708-linux-gnueabi.
-#ARMGNU ?= $(CC)
-ARMGNU ?= arm-none-eabi
+ARMGCCLIBPATH=/usr/lib/gcc/arm-none-eabi/6.3.1/
 
-#ASOPTS=-march=arm -mcpu=arm1176jzf-s
-ASOPTS=-march=armv6 -mcpu=arm1176jzf-s #--mfpu=vfp
+# FOLDERS
+SOURCE=source/
+BUILD=build/
+LIB=lib/
+
+
+# OPTIONS for AS, CC and LD
+# todo: tweak for RPI, RPIB+, RPI2, RPI3
+CPU=arm1176jzf-s
+CPUINFO=-mcpu=$(CPU) -mfpu=vfp #-march=armv6
+CCPU=-marm -mfloat-abi=hard
+
+ASOPTS=-g $(CPUINFO)
 LDOPTS=
-CFLAGS=-std=c99
+CFLAGS=-std=c99 -Wall -pedantic -g $(CPUINFO) $(CCPU) -Os #-mcpu=arm1176jzf-s
 
-# The intermediate directory for compiled object files.
-BUILD = build/
 
-# The directory in which source files are stored.
-SOURCE = source/
+LIBC=lib/libc.a
+LIBM=lib/libm.a
+NEWLIB_PATH=newlib-cygwin
+NEWLIB=$(LIB)$(NEWLIB_PATH)
+NEWLIB_PREP=$(NEWLIB)/newlib/libc/sys/arm/
 
-# The name of the output file to generate.
-TARGET = kernel.img
+# KERNELNAME
+KRNL=kernel
 
-# The name of the assembler listing file to generate.
-LIST = kernel.list
+# gather all s and c files
+OBJECTS := $(patsubst $(SOURCE)%.s,$(BUILD)%.o, $(patsubst $(SOURCE)%.c,$(BUILD)%.o, $(wildcard $(SOURCE)*.s) $(wildcard $(SOURCE)*.c)))
 
-# The name of the map file to generate.
-MAP = kernel.map
-
-# The name of the linker script to use.
-LINKER = kernel.ld
-
-# The names of all object files that must be generated. Deduced from the 
-# assembly code files in source.
-ASSRCS := $(patsubst $(SOURCE)%.s,$(BUILD)%.o,$(wildcard $(SOURCE)*.s))
-LIBCOBJ := $(patsubst $(SOURCE)libc/%.s, $(BUILD)%_libc.o, $(wildcard $(SOURCE)libc/*.s))
-CSRCS := $(patsubst $(SOURCE)%.c, $(BUILD)%_c.o, $(wildcard $(SOURCE)*.c))
-
-PROCESS := $(patsubst $(SOURCE)process/%.s,$(BUILD)%_process.o,$(wildcard $(SOURCE)process/*.s))
-PROCESSC := $(patsubst $(SOURCE)process/%.c,$(BUILD)%_process_c.o,$(wildcard $(SOURCE)process/*.c))
-
-OBJECTS = $(ASSRCS) $(LIBCOBJ) $(CSRCS) $(PROCESS) $(PROCESSC)
-
-# Rule to make everything.
-all: $(TARGET) $(LIST)
-
-# Rule to remake everything. Does not include clean.
-rebuild: all
-
-# Rule to make the listing file.
-$(LIST) : $(BUILD)output.elf
-	$(ARMGNU)-objdump -d $(BUILD)output.elf > $(LIST)
-
-# Rule to make the image file.
-$(TARGET) : $(BUILD)output.elf
-	$(ARMGNU)-objcopy $(BUILD)output.elf -O binary $(TARGET) 
-
-# Rule to make the elf file.
-$(BUILD)output.elf : $(OBJECTS) $(LINKER)
-	$(ARMGNU)-ld --no-undefined $(OBJECTS) $(LDOPTS) -Map $(MAP) -o $(BUILD)output.elf -T $(LINKER)
-
-# Rule to make the object files.
-$(BUILD)%.o: $(SOURCE)%.s $(BUILD)
-	$(ARMGNU)-as -I $(SOURCE) $(ASOPTS) $< -o $@
+# Rule to make the RPI1-version.
+all: 
+	$(MAKE)  rpi
 	
-$(BUILD)%_libc.o: $(SOURCE)libc/%.s $(BUILD)
-	$(ARMGNU)-as -I $(SOURCE) $(ASOPTS) $< -o $@
+# RPI
+rpi: PLAT=PLATFORM_RPI 
+rpi: $(BUILD) $(KRNL).img
 
-$(BUILD)%_c.o: $(SOURCE)%.c $(BUILD)
-	$(ARMGNU)-gcc -I $(SOURCE) $(CFLAGS)  $< -c -o $@
+# RPI2
+rpi2: PLAT=PLATFORM_RPI2 
+rpi2: $(BUILD) $(KRNL).img
 
-$(BUILD)%_process_c.o: $(SOURCE)process/%.c $(BUILD)
-	$(ARMGNU)-gcc -I $(SOURCE) $(CFLAGS) $< -c -o $@ 
-$(BUILD)%_process.o: $(SOURCE)process/%.s $(BUILD)
-	$(ARMGNU)-as -I $(SOURCE) $(ASOPTS) $< -c -o $@ 
+# RPI B+
+rpibp: PLAT=PLATFORM_RPIBP 
+rpibp: $(BUILD) $(KRNL).img 
 
+# build newlib
+# TARGET_CC="arm-none-eabi-gcc"
+# TARGET_AR="arm-none-eabi-ar"
+newlib: $(BUILD) $(LIBC)
+$(LIB)build/arm-none-eabi/newlib/libc.a: 
+	cd $(LIB)build && \
+		CFLAGS_FOR_TARGET="$(CPUINFO) $(CCPU)"\
+		../$(NEWLIB_PATH)/configure --target=arm-none-eabi --enable-newlib-hw-fp --with-float=hard --with-cpu=arm1176jzf-s --with-fpu=vfp --disable-multilib --disable-shared --enable-target-optspace  --disable-newlib-supplied-syscalls && \
+		$(MAKE) 
 
+$(LIBC): $(LIB)build/arm-none-eabi/newlib/libc.a
+	cp $(LIB)build/arm-none-eabi/newlib/libc.a $(LIBC)
+	cp $(LIB)build/arm-none-eabi/newlib/libm.a $(LIBM)
+
+newlib_clean:
+	rm -r $(LIB)build
+	mkdir $(LIB)build
+	rm $(LIBC) $(LIBM)
+
+# make a listing from the kernel.elf file
+dump: $(BUILD) $(KRNL).elf $(KRNL).list
+$(KRNL).list : $(KRNL).elf
+	$(ARM)-objdump -d $(KRNL).elf > $(KRNL).list
+
+# make the kernel-image
+$(KRNL).img : $(KRNL).elf
+	$(ARM)-objcopy $(KRNL).elf -O binary $(KRNL).img
+$(KRNL).elf : $(OBJECTS) $(LINKER)
+	$(ARM)-ld --no-undefined $(OBJECTS) $(LDOPTS) -Map $(KRNL).map -o $(KRNL).elf -L $(LIB) -lc -lm -L $(ARMGCCLIBPATH) -lgcc -T $(KRNL).ld
+
+# built objectfiles from assembler or c
+$(BUILD)%.o: $(SOURCE)%.s
+	$(AS) -I $(SOURCE) $(ASOPTS) $< -o $@
+$(BUILD)%.o: $(SOURCE)%.c
+	$(CC) -D$(PLAT) -I $(SOURCE) $(CFLAGS)  $< -c -o $@
+
+# create the build-folder
 $(BUILD):
-	mkdir $@
+	mkdir $(BUILD)
 
-# Rule to clean files.
+# delete the created files
 clean : 
-	-rm -rf $(BUILD)
-	-rm -f $(TARGET)
-	-rm -f $(LIST)
-	-rm -f $(MAP)
+	rm $(BUILD)*.o
+	rm $(KRNL).img $(KRNL).elf $(KRNL)
+	rm $(KRNL).list $(KRNL).map

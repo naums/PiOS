@@ -69,6 +69,18 @@ newlib_clean:
 	mkdir $(LIB)build
 	rm $(LIBC) $(LIBM)
 
+yailfc:
+	cd $(LIB)yailfc && \
+		CPU="$(CPUINFO) $(CCPU)"\
+		PF="arm-none-eabi-" \
+		make lib
+	mv $(LIB)yailfc/libyailfc.a $(LIB)libyailfc.a
+
+yailfc_clean:
+	rm $(LIB)libyailfc.a
+	cd $(LIB)yailfc && \
+		make clean
+
 # make a listing from the kernel.elf file
 dump: $(BUILD) $(KRNL).elf $(KRNL).list
 $(KRNL).list : $(KRNL).elf

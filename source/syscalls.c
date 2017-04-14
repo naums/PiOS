@@ -65,68 +65,54 @@ initialise_monitor_handles (void)
 //}
 
 
-int
-_read (int file,
-       char * ptr,
-       int len)
+int _read (int file, char * ptr, int len)
 {
-  return len;
+    /** TODO: read from buffer **/
+    
 }
 
 
-int
-_lseek (int file,
-    int ptr,
-    int dir)
+int _lseek (int file, int ptr, int dir)
 {
     return 0;
 }
 
-int
-_open (const char * path,
-       int          flags,
-       ...)
+int _open (const char * path, int flags, ...)
 {
     return 0;
 }
 
 
-int
-_close (int file)
+int _close (int file)
 {
     return 0;
 }
 
-void
-_exit (int n)
+void _exit (int n)
 {
-    while(1);
+    blinkloop();
 }
 
-int
-_kill (int n, int m)
+int _kill (int n, int m)
 {
     return(0);
 }
 
-int
-_getpid (int n)
+int _getpid (int n)
 {
   return 1;
   n = n;
 }
 
 
-caddr_t
-_sbrk (int incr)
+caddr_t _sbrk (int incr)
 {
     prev_heap_end = heap_end;
     heap_end += incr;
     return (caddr_t) prev_heap_end;
 }
 
-int
-_fstat (int file, struct stat * st)
+int _fstat (int file, struct stat * st)
 {
   return 0;
 }
@@ -136,26 +122,22 @@ int _stat (const char *fname, struct stat *st)
   return 0;
 }
 
-int
-_link (void)
+int _link (void)
 {
   return -1;
 }
 
-int
-_unlink (void)
+int _unlink (void)
 {
   return -1;
 }
 
-void
-_raise (void)
+void _raise (void)
 {
   return;
 }
 
-int
-_gettimeofday (struct timeval * tp, struct timezone * tzp)
+int _gettimeofday (struct timeval * tp, struct timezone * tzp)
 {
     if(tp)
     {
@@ -170,8 +152,7 @@ _gettimeofday (struct timeval * tp, struct timezone * tzp)
     return 0;
 }
 
-clock_t
-_times (struct tms * tp)
+clock_t _times (struct tms * tp)
 {
     clock_t timeval;
 
@@ -187,15 +168,13 @@ _times (struct tms * tp)
 };
 
 
-int
-_isatty (int fd)
+int _isatty (int fd)
 {
   return 1;
   fd = fd;
 }
 
-int
-_system (const char *s)
+int _system (const char *s)
 {
   if (s == NULL)
     return 0;
@@ -203,8 +182,7 @@ _system (const char *s)
   return -1;
 }
 
-int
-_rename (const char * oldpath, const char * newpath)
+int _rename (const char * oldpath, const char * newpath)
 {
   errno = ENOSYS;
   return -1;

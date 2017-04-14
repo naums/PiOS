@@ -3,13 +3,6 @@
 
 #include <stdio.h>
 
-struct vc4_init
-{
-    int w, h, vw, vh, gpu, depth, x, y, ptr, size;
-};
-
-extern struct vc4_init framebufferInfo;
-
 int _write ( int fd, const char* ptr, int size )
 {
     uart_puts ( ptr );
@@ -28,11 +21,8 @@ int main ()
     char str[]="\r\nBooting PiOS newlib :)\r\n\0";
     //write (0, str, strlen(str));
     printf ("Hello Lads, How are you? %d, 0x%03x\r\n", 123, 0xec );
-    
-    printf ( "FB_info: 0x%x", &framebufferInfo);
-    printf ( "FB-ptr: 0x%x\n", framebufferInfo.ptr );
 
-    struct Image fb = createImage ( RGB, 1920, 1080, (void*) framebufferInfo.ptr );
+    struct Image fb = createImage ( RGB, 1920, 1080, (void*) framebufferInfo_ptr );
     
     uart_puts ( "After IMG create\n\0");
 

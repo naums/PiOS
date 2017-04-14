@@ -1,4 +1,3 @@
-.globl framebufferAddr
 .globl framebufferInit
 .globl postmanWrite
 .globl postmanRead
@@ -142,6 +141,7 @@ framebufferInfo:
     .int 16   // 0x14 Color depth
     .int 0    // 0x18 X
     .int 0    // 0x1c Y
+framebufferInfo_ptr:
     .int 0    // 0x20 GPU Framebuffer ptr
     .int 0    // 0x24 GPU Framebuffer Size
 

@@ -1,20 +1,20 @@
 #include "uart.h"
-#include "image.h"
+//#include "image.h"
 
 #include <stdio.h>
 
 int _write ( int fd, const char* ptr, int size )
 {
-    uart_puts ( ptr );
+    pios_uart_write ( ptr, size );
 }
 
 extern void blinkloop();
 
 int main ()
 {
-    uart_init();
+    pios_uart_init();
     
-    uart_puts("\r\nHello Lads!\r\n\0");
+    pios_uart_puts("\r\nHello Lads!\r\n\0");
     
     // print the header and some build-info    
     //uart_puts("\r\Booting PiOS newlib :)\r\n");
@@ -22,7 +22,17 @@ int main ()
     //write (0, str, strlen(str));
     printf ("Hello Lads, How are you? %d, 0x%03x\r\n", 123, 0xec );
 
-    struct Image fb = createImage ( RGB, 1920, 1080, (void*) framebufferInfo_ptr );
+    char a = pios_uart_getchar();
+    while (a != 'a')
+    {
+        printf ("No\n");
+        a = pios_uart_getchar();
+    }
+    
+    printf ("YES!\n");
+
+
+    /*struct Image fb = createImage ( RGB, 1920, 1080, (void*) framebufferInfo_ptr );
     
     uart_puts ( "After IMG create\n\0");
 
@@ -49,7 +59,7 @@ int main ()
     pios_window_control_focus ( hwnd, cb2 );
     pios_window_invalidate ( hwnd );
     
-    uart_puts ( "After INVALIDATE\n\0");
+    uart_puts ( "After INVALIDATE\n\0");*/
     
     blinkloop();
 }

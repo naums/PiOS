@@ -1,108 +1,81 @@
 /**
  * \file uart.h
  * \author Stefan Naumann
- * \date 08 April 2017
- * \brief prototypes and definitions for UART-related code on the Raspberry Pi,
- * most of the actual code is directly taken from dwelch67s "uart05"-demo.
- * See the legal notice on the bottom of the header-file
+ * \date 17. April 2017
+ * \brief Code for the AUX-miniUART of the Raspberry Pi
  **/
 
-#ifndef RASPBOOTIN2_UART
-#define RASPBOOTIN2_UART
+#ifndef PIOS_UART
+#define PIOS_UART
 
 #include "platform.h"
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+
+/// will be used as offset with the PBASE-address to get the AUX address 
+/// in the I/O-device memory section
+#define AUX_BASE_ADDR 0x00200000
 
 /**
- * \brief put a 32-bit word to a specific address
- * \param[in] r0 the address to write to
- * \param[in] r1 the value for writing
- * \author David Welch
+ * \brief enum type for enumerating the registers of the AUX-peripheral of BCM2835
+ * \note see section 2.1.1 in the manual
  **/
-extern void PUT32 ( unsigned int, unsigned int );
-/**
- * \brief get a 32-bit word from an address
- * \param[in] r0 the address to read from
- * \return the read value
- * \author David Welch
- **/
-extern unsigned int GET32 ( unsigned int );
-/**
- * \brief jump; just waste time
- * \author David Welch
- **/
-extern void dummy ( unsigned int );
+enum pios_aux_t
+{
+    AUX_IRQ         =  0,       ///< AUX Interrupt status (for hierarchical source-detection)
+    AUX_ENABLE      =  1,       ///< AUX enable (last 3 bits: SPI2, SPI1, UART [2,1,0])
+    
+    AUX_MU_IO       = 16,       ///< UART I/O Data
+    AUX_MU_IER      = 17,       ///< UART IRQ Enable
+    AUX_MU_IIR      = 18,       ///< UART IRQ Identify
+    AUX_MU_LCR      = 19,       ///< UART Line Control
+    AUX_MU_MCR      = 20,       ///< UART Modem Control
+    AUX_MU_LSR      = 21,       ///< UART Line Status
+    AUX_MU_MSR      = 22,       ///< UART Modem Status
+    AUX_MU_SCRATCH  = 23,       ///< UART Scratch ( an extra 8 bit buffer(?) )
+    AUX_MU_CNTL     = 24,       ///< UART Extra Control
+    AUX_MU_STAT     = 25,       ///< UART Extra Status
+    AUX_MU_BAUD     = 26,       ///< UART Baudrate
+    
+    AUX_SPI0_CNTL0  = 32,       ///< SPI 0 Control Register 0
+    AUX_SPI0_CNTL1  = 33,       ///< SPI 0 Control Register 1
+    AUX_SPI0_STAT   = 34,       ///< SPI 0 Status
+    AUX_SPI0_IO     = 35,       ///< SPI 0 Data
+    AUX_SPI0_PEEK   = 36,       ///< SPI 0 Peek
+    
+    AUX_SPI1_CNTL0  = 48,       ///< SPI 1 Control Register 0
+    AUX_SPI1_CNTL1  = 49,       ///< SPI 1 Control Register 1
+    AUX_SPI1_STAT   = 50,       ///< SPI 1 Status
+    AUX_SPI1_IO     = 51,       ///< SPI 1 Data
+    AUX_SPI1_PEEK   = 52        ///< SPI 1 Peek
+};
 
-/**
- * \brief jump to the specified address
- * \param[in] r0 the address to jump to
- * \author Stefan Naumann
- **/
-extern void BOOTUP ( unsigned int );
+#define AUX_UART ( 1 << 0 )
+#define AUX_SPI0 ( 1 << 1 )
+#define AUX_SPI1 ( 1 << 2 )
 
-#define GPFSEL1         (PBASE+0x00200004)
-#define GPSET0          (PBASE+0x0020001C)
-#define GPCLR0          (PBASE+0x00200028)
-#define GPPUD           (PBASE+0x00200094)
-#define GPPUDCLK0       (PBASE+0x00200098)
+#define AUX_TX_IDLE ( 1 << 6 )
+#define AUX_TX_EMPTY ( 1 << 5 )
+#define AUX_RX_OVERRUN ( 1 << 1 )
+#define AUX_RX_DATA ( 1 << 0 )
 
-#define AUX_ENABLES     (PBASE+0x00215004)
-#define AUX_MU_IO_REG   (PBASE+0x00215040)
-#define AUX_MU_IER_REG  (PBASE+0x00215044)
-#define AUX_MU_IIR_REG  (PBASE+0x00215048)
-#define AUX_MU_LCR_REG  (PBASE+0x0021504C)
-#define AUX_MU_MCR_REG  (PBASE+0x00215050)
-#define AUX_MU_LSR_REG  (PBASE+0x00215054)
-#define AUX_MU_MSR_REG  (PBASE+0x00215058)
-#define AUX_MU_SCRATCH  (PBASE+0x0021505C)
-#define AUX_MU_CNTL_REG (PBASE+0x00215060)
-#define AUX_MU_STAT_REG (PBASE+0x00215064)
-#define AUX_MU_BAUD_REG (PBASE+0x00215068)
+void pios_uart_init ( );
+void pios_uart_write ( const char* str, size_t len );
+void pios_uart_read ( char* buff, size_t len );
 
-/**
- * \brief return the content of the control register
- * \author David Welch
- **/
-unsigned int uart_lcr ( void );
-/**
- * \brief return the currently received value from the UART-controller
- * \note does not create an input-queue!
- * \author David Welch
- **/
-unsigned int uart_recv ( void );
-/**
- * \brief check for a new character (return 1 if available, 0 if not)
- * \author David Welch
- **/
-unsigned int uart_check ( void );
-/**
- * \brief send a character through the UART
- * \param[in] c the character to send
- * \author David Welch
- **/
-void uart_send ( unsigned int c );
-/**
- * \brief will send a string through the UART
- * \param[in] str the string to be sent
- * \author Stefan Naumann
- **/
-void uart_puts ( char* str );
+void pios_uart_putchar ( const char c );
+uint32_t pios_uart_getchar ( );
+void pios_uart_setBaud ( uint16_t baudfactor );
+void pios_uart_setDataSize ( int size );
+void pios_uart_puts ( const char* str );
 
-/**
- * \brief wait until every operation ended (?)
- * \author David Welch
- **/
-void uart_flush ( void );
-/**
- * \brief initiate the UART-interface 
- * \author David Welch
- **/
-void uart_init ( void );
+bool pios_uart_rxReady ();
+bool pios_uart_txReady ();
+
+int pios_uart_rxQueue ();
+int pios_uart_txQueue ();
+
+void pios_uart_flush ();
 
 #endif
-
-
-// Copyright of the UART-code (c) 2012 David Welch dwelch@dwelch.com
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.

@@ -1,7 +1,7 @@
 /**
  * \file uart.h
  * \author Stefan Naumann
- * \date 17. April 2017
+ * \date 17. May 2017
  * \brief Code for the AUX-miniUART of the Raspberry Pi
  **/
 
@@ -15,7 +15,7 @@
 
 /// will be used as offset with the PBASE-address to get the AUX address 
 /// in the I/O-device memory section
-#define AUX_BASE_ADDR 0x00200000
+#define AUX_BASE_ADDR 0x00215000
 
 /**
  * \brief enum type for enumerating the registers of the AUX-peripheral of BCM2835

@@ -11,7 +11,12 @@
 #define PIOS_I2C_BCS
 
 #include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
 #include "platform.h"
+
+/// base clock rate used for calculation of the frequency; normally 150MHz
+#define PIOS_I2C_CLOCKRATE 150000000
 
 /// base address offset for BCS1
 #define PIOS_I2C_BASE 0x00205000
@@ -32,15 +37,15 @@
 
 //** flags for the status register **//
 #define I2C_CLKT ( 1 << 9 )
-#define I2C_ERR ( 1 << 8 )
-#define I2C_RXF ( 1 << 7 )
-#define I2C_TXE ( 1 << 6 )
-#define I2C_RXD ( 1 << 5 )
-#define I2C_TXD ( 1 << 4 )
-#define I2C_RXR ( 1 << 3 )
-#define I2C_TXW ( 1 << 2 )
+#define I2C_ERR  ( 1 << 8 )
+#define I2C_RXF  ( 1 << 7 )
+#define I2C_TXE  ( 1 << 6 )
+#define I2C_RXD  ( 1 << 5 )
+#define I2C_TXD  ( 1 << 4 )
+#define I2C_RXR  ( 1 << 3 )
+#define I2C_TXW  ( 1 << 2 )
 #define I2C_DONE ( 1 << 1 )
-#define I2C_TA  ( 1 << 0 )
+#define I2C_TA   ( 1 << 0 )
 
 /**
  * \brief datastructure to map the registers to names
@@ -59,64 +64,20 @@ struct _pios_bcs_t
 
 extern pios_i2c_t* pios_i2c;
 
-inline void pios_i2c_enable ()
-{
-    pios_i2c->control |= I2C_EN; 
-}
-
-inline void pios_i2c_disable ()
-{
-    pios_i2c->control &= ~I2C_en;
-}
-
-inline void pios_i2c_start ()
-{
-    pios_i2c->control |= I2C_ST;
-}
-
-inline void pios_i2c_control ( uint32_t flags )
-{
-    pios_i2c->control = flags;
-}
-
-inline void pios_i2c_clearFifo ()
-{
-    pios_i2c->control |= I2C_CLEAR;
-}
-
-inline void pios_i2c_dlen ( uint32_t dlen )
-{
-    pios_i2c->datalen = dlen & (0xffff);
-}
-
-inline void pios_i2c_setAddress ( uint32_t address )
-{
-    pios_i2c->address = address & (0x7f);
-}
-
-inline uint32_t pios_i2c_getAddress ( )
-{
-    return pios_i2c->address & (0x7f);
-}
-
-inline void pios_i2c_send ( uint32_t data )
-{
-    pios_i2c->fifo = data & 0xff;
-}
-
-inline uint32_t pios_i2c_recv ()
-{
-    return pios_i2c->fifo & 0xff;
-}
-
-inline void pios_i2c_setDivider ( uint32_t div )
-{
-    pios_i2c->divider = div & 0xffff;
-}
-
-inline uint32_t pios_i2c_getDivider ()
-{
-    return pios_i2c->divider & 0xffff;
-}
+void pios_i2c_enable ();
+void pios_i2c_disable ();
+void pios_i2c_start ();
+void pios_i2c_control ( uint32_t flags );
+void pios_i2c_clearFifo ();
+void pios_i2c_dlen ( uint32_t dlen );
+void pios_i2c_setAddress ( uint32_t address );
+uint32_t pios_i2c_getAddress ( );
+void pios_i2c_putchar ( uint32_t data );
+void pios_i2c_write ( const char* str, size_t len );
+void pios_i2c_wait ();
+uint32_t pios_i2c_getchar ();
+void pios_i2c_setDivider ( uint32_t div );
+uint32_t pios_i2c_getDivider ();
+void pios_i2c_init ( uint32_t freq, bool irqt, bool irqr, bool irqd );
 
 #endif

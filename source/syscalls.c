@@ -165,7 +165,7 @@ clock_t _times (struct tms * tp)
         tp->tms_cstime = 0; /* system time, children */
     }
     return timeval;
-};
+}
 
 
 int _isatty (int fd)
@@ -178,12 +178,12 @@ int _system (const char *s)
 {
   if (s == NULL)
     return 0;
-  errno = ENOSYS;
+  //errno = ENOSYS;
   return -1;
 }
 
 int _rename (const char * oldpath, const char * newpath)
 {
-  errno = ENOSYS;
+  //errno = ENOSYS;
   return -1;
 }

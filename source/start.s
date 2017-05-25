@@ -42,14 +42,14 @@ halt:
 	b halt
 
 blinkloop:
-    mov r0, #16
+    mov r0, #47
     mov r1, #1
     bl gpio_write
     
     mov r0, #1
     bl wait
     
-    mov r0, #16
+    mov r0, #47
     mov r1, #0
     bl gpio_write
     

@@ -1,6 +1,7 @@
 #include "i2c.h"
+#include "native_io.h"
 
-pios_i2c_t* pios_i2c = (pios_i2c_t*) PBASE + PIOS_I2C_BASE;
+volatile pios_i2c_t volatile* pios_i2c = (volatile pios_i2c_t volatile*) PBASE + PIOS_I2C_BASE;
 
 
 void pios_i2c_enable ()
@@ -102,4 +103,8 @@ void pios_i2c_init ( uint32_t freq, bool irqt, bool irqr, bool irqd )
     uint32_t flags = ( (irqt ? I2C_INTT : 0) | (irqr ? I2C_INTR : 0) | (irqd ? I2C_INTD : 0) ) | I2C_EN;
     pios_i2c_setDivider ( freq );
     pios_i2c_control ( flags );
+    
+    gpio_pinmode ( 2, 0x4 );
+    gpio_pinmode ( 3, 0x4 );
+    pios_i2c_enable();
 }

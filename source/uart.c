@@ -25,7 +25,7 @@ void pios_uart_init ( )
     pios_aux_reg[AUX_MU_MCR] = 0;
     pios_aux_reg[AUX_MU_IER] = 0;
     pios_aux_reg[AUX_MU_IIR] = 0xc6;
-    //pios_aux_reg[AUX_MU_LCR] = 1;   // 8 bit mode
+    pios_aux_reg[AUX_MU_LCR] = 1;   // 8 bit mode
     pios_aux_reg[AUX_MU_BAUD] = 270;
                 
     /**
@@ -39,12 +39,12 @@ void pios_uart_init ( )
        * see: Manual pg 101
     **/
     unsigned ra;
-    /*ra=(*(uint32_t*)GPFSEL1);
+    ra=(*(uint32_t*)GPFSEL1);
     ra&=~(7<<12); //gpio14
     ra|=2<<12;    //alt5
     ra&=~(7<<15); //gpio15
     ra|=2<<15;    //alt5
-    (*(uint32_t*)GPFSEL1)=ra;*/
+    (*(uint32_t*)GPFSEL1)=ra;
     (*(uint32_t*)GPPUD)=0;
     for(ra=0;ra<150;ra++) { dummy(ra); };
     (*(uint32_t*)GPPUDCLK0) = (1<<14)|(1<<15);

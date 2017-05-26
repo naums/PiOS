@@ -63,22 +63,83 @@ struct _pios_bcs_t
     uint32_t stretch;   ///< how long can the slave stretch the clock to decide that it has hung
 } typedef pios_bcs_t, pios_i2c_t;
 
+/// struct mapping the registers of the i2c-controller
 extern volatile pios_i2c_t* const pios_i2c;
 
+/**
+ * \brief enables the i2c-controller
+ **/
 void pios_i2c_enable ();
+/**
+ * \brief disables the i2c-controller
+ **/
 void pios_i2c_disable ();
+/**
+ * \brief starts an i2c-transmission
+ **/
 void pios_i2c_start ();
+/**
+ * \brief sets the control-register according to the flags-parameter
+ * \param[in] flags the value to be set as control-register
+ **/
 void pios_i2c_control ( uint32_t flags );
+/**
+ * \brief clears the queue for transmission-bytes
+ **/
 void pios_i2c_clearFifo ();
+/**
+ * \brief set a length of the (next) transmission
+ * \param[in] dlen the length of the next transmission in Bytes
+ **/
 void pios_i2c_dlen ( uint32_t dlen );
+/**
+ * \brief set an address (I guess it's the slaves address)
+ * \param[in] address the slave address
+ **/
 void pios_i2c_setAddress ( uint32_t address );
+/**
+ * \brief return the set address
+ * \return the address which has been set earlier
+ **/
 uint32_t pios_i2c_getAddress ( );
+/**
+ * \brief transmit a character over i2c
+ * \param[in] data the character to be transmitted
+ * \note waits until the queue can take a byte more
+ **/
 void pios_i2c_putchar ( uint32_t data );
+/**
+ * \brief transmit a string over i2c
+ * \param[in] str the string to be transmitted
+ * \param[in] len the length of the transmission, i.e. string
+ * \note waits for every byte until the queue can take a byte more
+ **/
 void pios_i2c_write ( const char* str, size_t len );
+/**
+ * \brief buisy-wait until the last transmission is finished
+ **/
 void pios_i2c_wait ();
+/**
+ * \brief read a byte from the FIFO-queue
+ **/
 uint32_t pios_i2c_getchar ();
+/**
+ * \brief set a divider for the clock (i.e. set the clock-rate of the i2c-transmission
+ * \param[in] div the frequency is calculated from : freq = core_clock / div
+ **/
 void pios_i2c_setDivider ( uint32_t div );
+/**
+ * \brief read the set divider
+ * \return the divider set earlier
+ **/
 uint32_t pios_i2c_getDivider ();
+/**
+ * \brief initiates the i2c-controller
+ * \param[in] freq the wanted frequency for the transmissions
+ * \param[in] irqt enable interrupts when the FIFO is empty while transmission (?)
+ * \param[in] irqr enable interrupts when the FIFO is full while reading
+ * \param[in] irqd enable interrupts when transmission is done
+ **/
 void pios_i2c_init ( uint32_t freq, bool irqt, bool irqr, bool irqd );
 
 #endif

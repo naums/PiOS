@@ -2,6 +2,7 @@
 ARM = arm-none-eabi
 CC = $(ARM)-gcc
 AS = $(ARM)-as
+AR = $(ARM)-ar
 
 ARMGCCLIBPATH=/usr/lib/gcc/arm-none-eabi/7.1.0/
 
@@ -21,6 +22,10 @@ ASOPTS=-g $(CPUINFO)
 LDOPTS=
 CFLAGS=-std=c99 -Wall -pedantic -g $(CPUINFO) $(CCPU) -Os #-mcpu=arm1176jzf-s
 
+LIBEXCLUDE=$(BUILD)main.o\
+           $(BUILD)irq.o\
+           $(BUILD)start.o\
+           $(BUILD)syscalls.o
 
 LIBC=lib/libc.a
 LIBM=lib/libm.a
@@ -33,9 +38,12 @@ KRNL=kernel
 
 # gather all s and c files
 OBJECTS := $(patsubst $(SOURCE)%.s,$(BUILD)%.o, $(patsubst $(SOURCE)%.c,$(BUILD)%.o, $(wildcard $(SOURCE)*.s) $(wildcard $(SOURCE)*.c)))
+LIBOBJ := $(filter-out $(LIBEXCLUDE),$(OBJECTS))
+OBJECTS := $(filter-out $(LIBOBJ),$(OBJECTS))
 
 # Rule to make the RPI1-version.
 all: 
+	echo $(LIBOBJ)
 	$(MAKE)  rpi
 	
 # RPI
@@ -89,14 +97,17 @@ $(KRNL).list : $(KRNL).elf
 # make the kernel-image
 $(KRNL).img : $(KRNL).elf
 	$(ARM)-objcopy $(KRNL).elf -O binary $(KRNL).img
-$(KRNL).elf : $(OBJECTS) $(LINKER)
-	$(ARM)-ld --no-undefined $(OBJECTS) $(LDOPTS) -Map $(KRNL).map -o $(KRNL).elf -lyailfc -L $(LIB) -lc -lm -L $(ARMGCCLIBPATH) -lgcc -T $(KRNL).ld
+$(KRNL).elf : $(OBJECTS) $(LINKER) $(LIB)libpios.a
+	$(ARM)-ld --no-undefined $(OBJECTS) $(LDOPTS) -Map $(KRNL).map -o $(KRNL).elf -L $(LIB) -L $(ARMGCCLIBPATH) -lpios -lyailfc -lc -lm -lgcc -T $(KRNL).ld
 
 # built objectfiles from assembler or c
 $(BUILD)%.o: $(SOURCE)%.s
 	$(AS) -I $(SOURCE) $(ASOPTS) $< -o $@
 $(BUILD)%.o: $(SOURCE)%.c
 	$(CC) -D$(PLAT) -I $(SOURCE) -I $(LIB)yailfc/src $(CFLAGS) $< -c -o $@
+
+$(LIB)libpios.a: $(LIBOBJ)
+	$(AR) rcv $(LIB)libpios.a $(LIBOBJ)
 
 # create the build-folder
 $(BUILD):

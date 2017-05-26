@@ -23,24 +23,6 @@ extern struct vc4_fbinfo framebufferInfo;
  * \return NONE
  **/
 void wait ( int s );
-/**
- * \brief returns the GPIO-base address in r0
- * \return r0 GPIO-base address
- **/
-void* gpio_address ();
-/**
- * \brief writes a value to the GPIO-Pin (i.e. writes 1 to set or 1 to clear)
- * \param pin GPIO-Pin
- * \param val output-value (1 for on, 0 for off)
- **/
-void gpio_write ( int pin, int val );
-/**
- * \brief sets the PIN into the mode we want
- * \param pin GPIO-Pin
- * \param val GPIO-Mode
- * \return NONE
- **/
-void gpio_pinmode ( int pin, int val );
 
 /**
  * \brief writes a message to a mailbox

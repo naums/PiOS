@@ -1,6 +1,7 @@
 #include "uart.h"
 //#include "image.h"
 #include "lcd.h"
+#include "gpio.h"
 
 #include <stdio.h>
 
@@ -9,7 +10,18 @@ int _write ( int fd, const char* ptr, int size )
     pios_uart_write ( ptr, size );
 }
 
-extern void blinkloop();
+void __attribute__ ((noreturn)) blinkloop() 
+{
+    pios_gpio_pinmode ( 47, PIOS_GPIO_OUTPUT );
+
+    while ( 1 )
+    {
+        pios_gpio_write ( 47, PIOS_GPIO_HIGH );
+        wait ( 1 );
+        pios_gpio_write ( 47, PIOS_GPIO_LOW );
+        wait ( 1 );
+    }
+}
 
 int main ()
 {

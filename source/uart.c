@@ -1,5 +1,4 @@
 #include "uart.h"
-#include "native_io.h"
 
 volatile uint32_t* pios_aux_reg = (volatile uint32_t*) PBASE + AUX_BASE_ADDR;
 void dummy ( unsigned int );
@@ -15,8 +14,8 @@ void dummy ( unsigned int );
 void pios_uart_init ( )
 {    
     // set the GPIO-pins into the correct state
-    gpio_pinmode ( 14, 2 );
-    gpio_pinmode ( 15, 2 );
+    pios_gpio_pinmode ( 14, PIOS_GPIO_ALT5 );
+    pios_gpio_pinmode ( 15, PIOS_GPIO_ALT5 );
     
     pios_aux_reg[AUX_ENABLE] = AUX_UART;
     pios_aux_reg[AUX_MU_CNTL] = 0;
@@ -38,18 +37,9 @@ void pios_uart_init ( )
        *    6. Write to GPPUDCLK0/1 to remove the clock
        * see: Manual pg 101
     **/
-    unsigned ra;
-    ra=(*(uint32_t*)GPFSEL1);
-    ra&=~(7<<12); //gpio14
-    ra|=2<<12;    //alt5
-    ra&=~(7<<15); //gpio15
-    ra|=2<<15;    //alt5
-    (*(uint32_t*)GPFSEL1)=ra;
-    (*(uint32_t*)GPPUD)=0;
-    for(ra=0;ra<150;ra++) { dummy(ra); };
-    (*(uint32_t*)GPPUDCLK0) = (1<<14)|(1<<15);
-    for(ra=0;ra<150;ra++) { dummy(ra); };
-    (*(uint32_t*)GPPUDCLK0) = 0;
+
+    uint32_t p[2] = { 0, (1<<14)|(1<<15) };
+    pios_gpio_pullBulk ( p, PIOS_GPIO_PULL_OFF );
     
     pios_aux_reg[AUX_MU_CNTL] = 3;
 }

@@ -1,9 +1,19 @@
 # PiOS
-Simple prototype operating system for the Raspberry Pi. It aims to be a simple operating system for learning and teaching the ins and outs of operating system development in general and the architecture of a real world System on a Chip (BCM2835) in particular.    
+Simple prototype operating system for the Raspberry Pi. It aims to be a simple operating system for learning and teaching the ins and outs of operating system development in general and the architecture of a real world System on a Chip (BCM2835) in particular.
 
-This project is explicitly not PylotOS (the Python-Operating System). If you want that, see https://github.com/tuc-osg/pylotos 
-
-# Goals
+## Goals
 The main goal of the project is to learn loads of interesting facts about operating system development. Maybe it will be possible to use the operating system in OS-classes for teaching and experimenting. 
 
-The operating system will probably not became stable enough to use in real-life. You've been warned.
+The operating system will probably not become stable enough to use in real-life. You've been warned.
+
+Maybe this can become a set of drivers and features which can be used as a static library by other embedded programming projects on the Raspberry Pi. They probably all exist already somewhere else, like in the [RaspberryPi-Repository](https://github.com/dwelch67/raspberrypi) of dwelch67.
+
+## "Current" state
+The code is currently being updated and rewritten in C. There are the following drivers, which are (at the moment) not tested thoroughly and probably will not work correctly:
+* Postman requesting a framebuffer from the VideoCore IV
+* GPIO
+* I2C-interface
+* Interface to an LCD character display
+* UART
+
+I'm thinking about an interface for adding functions to specific interrupt service routines and also about a generic driver interface.

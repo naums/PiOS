@@ -9,6 +9,7 @@
 #define PIOS_UART
 
 #include "platform.h"
+#include "gpio.h"
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>

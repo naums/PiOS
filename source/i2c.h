@@ -14,6 +14,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include "platform.h"
+#include "gpio.h"
 
 /// base clock rate used for calculation of the frequency; normally 150MHz
 #define PIOS_I2C_CLOCKRATE 150000000
@@ -62,7 +63,7 @@ struct _pios_bcs_t
     uint32_t stretch;   ///< how long can the slave stretch the clock to decide that it has hung
 } typedef pios_bcs_t, pios_i2c_t;
 
-extern volatile pios_i2c_t volatile* pios_i2c;
+extern volatile pios_i2c_t* const pios_i2c;
 
 void pios_i2c_enable ();
 void pios_i2c_disable ();

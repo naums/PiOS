@@ -1,55 +1,82 @@
+/**
+ * \file gpio.h
+ * \author Stefan Naumann
+ * \date 26th May 2017
+ * \brief interfaces for using the GPIO-connectors on the Raspberry Pi;
+ * memory map of the registers and some functions for using the basic-features 
+ * of the GPIO-pins
+ **/
+
 #ifndef PIOS_GPIO
 #define PIOS_GPIO
 
 #include "platform.h"
 #include <stdint.h>
 
+/// the base offset address of the GPIO-registers in memory
 #define PIOS_GPIO_BASE 0x200000;
 
+/// constant for the low-signal level of a pin
 #define PIOS_GPIO_LOW 0
+/// constant for the high-signal level of a pin
 #define PIOS_GPIO_HIGH 1
 
+/// the mode INPUT as constant
 #define PIOS_GPIO_INPUT 0
+/// the mode OUTPUT as constant
 #define PIOS_GPIO_OUTPUT 1
+/// alternative function 0
 #define PIOS_GPIO_ALT0 4
+/// alternative function 1
 #define PIOS_GPIO_ALT1 5
+/// alternative function 2
 #define PIOS_GPIO_ALT2 6
+/// alternative function 3
 #define PIOS_GPIO_ALT3 7
+/// alternative function 4
 #define PIOS_GPIO_ALT4 3
+/// alternative function 5
 #define PIOS_GPIO_ALT5 2
 
+/// pull the level up
 #define PIOS_GPIO_PULL_UP 2
+/// pull the level down
 #define PIOS_GPIO_PULL_DOWN 1
+/// turn the pulling off
 #define PIOS_GPIO_PULL_OFF 0 
 
+/**
+ * \brief a mapping of the memory-registers of the GPIO-controller
+ **/
 struct _pios_gpio_t 
 {
-    uint32_t fn_select[6];
+    uint32_t fn_select[6];      ///< function select registers for the Pins      
     uint32_t pad1;
-    uint32_t outputset[2];
+    uint32_t outputset[2];      ///< registers for setting the levels HIGH
     uint32_t pad2;
-    uint32_t outputclear[2];
+    uint32_t outputclear[2];    ///< registers for setting the levels LOW
     uint32_t pad3;
-    uint32_t level[2];
+    uint32_t level[2];          ///< the levels of the pins for reading
     uint32_t pad4;
-    uint32_t eventDetect[2];
+    uint32_t eventDetect[2];    ///< indicates whether an event has occured (whathever is enabled)
     uint32_t pad5;
-    uint32_t risingEdgeDetect[2];
+    uint32_t risingEdgeDetect[2];   ///< en/disable rising edge for the eventDetect-field
     uint32_t pad6;
-    uint32_t fallingEdgeDetect[2];
+    uint32_t fallingEdgeDetect[2];  ///< en/disable falling edge for the eventDetect
     uint32_t pad7;
-    uint32_t highDetect[2];
+    uint32_t highDetect[2];    ///< en/disable HIGH as event for eventDetect
     uint32_t pad8;
-    uint32_t lowDetect[2];
+    uint32_t lowDetect[2];     ///< en/disable LOW as event for eventDetect
     uint32_t pad9;
-    uint32_t asyncRisingEdgeDetect[2];
+    uint32_t asyncRisingEdgeDetect[2];  ///< en/disable rising edge as asynchronous event for eventDetect (i.e. not bound to system clock)
     uint32_t pad10;
-    uint32_t asyncFallingEdgeDetect[2];
+    uint32_t asyncFallingEdgeDetect[2]; ///< en/disable falling edge as asynchronous event for eventDetect (i.e. not bound to system clock)
     uint32_t pad11;
-    uint32_t pullControlEnable;
-    uint32_t pullControlClock[2];
+    uint32_t pullControlEnable;     ///< set the pull-mode (i.e. UP, DOWN or OFF)
+    uint32_t pullControlClock[2];   ///< set pins for pulling (see the manual for the exact algorithm)
 } typedef pios_gpio_t;
 
+/// struct mapping the GPIO-controller-registers
 extern volatile pios_gpio_t* const pios_gpio;
 
 /**

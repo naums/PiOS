@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 
-#define pc uart_send
+#define pc pios_uart_putchar
 
 uint32_t printNum ( uint32_t num, uint32_t base, uint32_t length )
 {
@@ -105,29 +105,19 @@ int main ()
     //pios_lcd_init ( LCD_FN8_2 );
     
     //pios_lcd_write ("Hello World!", 12 );
-    uart_init();
-    uart_puts("\r\nHello Lads!\r\n\0", strlen("\r\nHello Lads!\r\n\0"));
-    printf ("Hello World from printf!\r\n");
-    char buff[100]; char * b = buff;
-    sprintf (buff,"AUX-address: ");
-    while ( *b )
-    {
-        putchar ( *b );
-        b++;
-    }
-        
-    printNum ( pios_aux, 16, 8 );
-    printNum ( &pios_aux[AUX_MU_IO], 16, 8 );
-    printNum ( AUX_MU_IO_REG, 16, 8 );
+    //uart_init();
     
-    while (1)
+    //while (1)
+    /*
     {
-        if ( (pios_aux[AUX_MU_LSR_REG] & AUX_TX_IDLE ) != 0)
-            break;
-    }
+        printNum ( &pios_aux[AUX_MU_LSR_REG], 16, 8 ); 
+        printNum ( pios_aux[AUX_MU_LSR_REG], 16, 8 );
+        if ( (pios_aux[AUX_MU_LSR_REG] & AUX_TX_IDLE ) != 0);
+            //break;
+    }*/
     
-    /*pios_uart_init();
-    pios_uart_puts("\r\nHello Lads!\r\n\0");*/
+    pios_uart_init();
+    pios_uart_puts("\r\nHello Lads!\r\n\0");
     
     //printf ("GPIO-address: %08x\n", pios_gpio);
     blinkloop();

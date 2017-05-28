@@ -13,20 +13,19 @@ void dummy ( unsigned int );
 
 void pios_uart_init ( )
 {    
-    // set the GPIO-pins into the correct state
-    pios_gpio_pinmode ( 14, PIOS_GPIO_ALT5 );
-    pios_gpio_pinmode ( 15, PIOS_GPIO_ALT5 );
-    
+    // set the GPIO-pins into the correct state   
     pios_aux[AUX_ENABLE] = AUX_UART;
-    pios_aux[AUX_MU_CNTL] = 0;
     pios_aux[AUX_MU_IER] = 0;
-    pios_aux[AUX_MU_LCR] = 3;
+    pios_aux[AUX_MU_CNTL] = 0;
+    pios_aux[AUX_MU_LCR] = 3;       // undocumented second bit (?)
     pios_aux[AUX_MU_MCR] = 0;
     pios_aux[AUX_MU_IER] = 0;
     pios_aux[AUX_MU_IIR] = 0xc6;
-    pios_aux[AUX_MU_LCR] = 1;   // 8 bit mode
     pios_aux[AUX_MU_BAUD] = 270;
                 
+                
+    pios_gpio_pinmode ( 14, PIOS_GPIO_ALT5 );
+    pios_gpio_pinmode ( 15, PIOS_GPIO_ALT5 );
     /**
      * set-up of Pull Up / Down: 
        *    1. Write to GPPUD to set the required control signal (i.e. Pull-up or Pull-Down or neither to remove the current Pull-up/down)
@@ -88,9 +87,9 @@ uint32_t pios_uart_getchar ( )
     return (0xff & pios_aux[AUX_MU_IO]);
 }
 
-void pios_uart_setBaud ( uint16_t baudfactor )
+void pios_uart_setBaud ( uint32_t baud )
 {
-    pios_aux[AUX_MU_BAUD] = baudfactor;
+    pios_aux[AUX_MU_BAUD] = (PIOS_AUX_SYSCLOCK / (baudfactor<<3)) + 1);
 }
 
 void pios_uart_setDataSize ( int size )

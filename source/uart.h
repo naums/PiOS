@@ -69,7 +69,7 @@ void pios_uart_read ( char* buff, size_t len );
 
 void pios_uart_putchar ( const char c );
 uint32_t pios_uart_getchar ( );
-void pios_uart_setBaud ( uint16_t baudfactor );
+void pios_uart_setBaud ( uint32_t baud );
 void pios_uart_setDataSize ( int size );
 void pios_uart_puts ( const char* str );
 

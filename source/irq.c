@@ -1,4 +1,6 @@
-#include <irq.h>
+#include "irq.h"
+#include "gpio.h"
+#include "timer.h"
 
 static struct rpi_irq_controller_t* rpiIRQController = (struct rpi_irq_controller_t*)IRQ_BASE;
 
@@ -27,17 +29,17 @@ void __attribute__((interrupt("UNDEF"))) undef_vector(void)
 }
 void __attribute__((interrupt("IRQ"))) irq_vector(void)
 {
+    static int val = PIOS_GPIO_HIGH;
     //void* lr, *sp;
     /*asm volatile ( "mov %0, lr\n"
                    "mov %1, sp\n"
                    : "=r" (lr), "=r" ( sp ) );*/
-    printf (" -> ! IRQ :( \n");
-    //printf ("SP: 0x%08x\nLR: 0x%08x\n", sp, lr);
- 
-    while( 1 )
-    {
+    pios_uart_puts (" -> ! IRQ :) \n");
     
-    }
+    pios_arm_timer->irqack = 1;
+    val = ((val == PIOS_GPIO_HIGH) ? PIOS_GPIO_LOW : PIOS_GPIO_HIGH);
+    pios_gpio_write ( 2, val );
+    
 }
 void __attribute__((interrupt("FIQ"))) fiq_vector(void)
 {

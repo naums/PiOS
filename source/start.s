@@ -42,7 +42,7 @@ _reset_:
     ldmia   r0!,{r2, r3, r4, r5, r6, r7, r8, r9}
     stmia   r1!,{r2, r3, r4, r5, r6, r7, r8, r9}
     
-    //bl pios_irq_enable
+    bl pios_irq_enable
     
     /* I don't really need a framebuffer right now
     ldr r0, =1920

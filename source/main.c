@@ -2,6 +2,7 @@
 //#include "image.h"
 #include "lcd.h"
 #include "gpio.h"
+#include "timer.h"
 
 #include <stdio.h>
 
@@ -68,14 +69,13 @@ int _write ( int fd, const char* ptr, int size )
 
 void __attribute__ ((noreturn)) blinkloop() 
 {
-    pios_gpio_pinmode ( 2, PIOS_GPIO_OUTPUT );
-
+    pios_gpio_pinmode ( 3, PIOS_GPIO_OUTPUT );
     while ( 1 )
     {
-        pios_gpio_write ( 2, PIOS_GPIO_HIGH );
-        wait ( 1 );
-        pios_gpio_write ( 2, PIOS_GPIO_LOW );
-        wait ( 1 );
+        pios_gpio_write ( 3, PIOS_GPIO_LOW );
+        wait(1);
+        pios_gpio_write ( 3, PIOS_GPIO_HIGH );
+        wait(1);
     }
 }
 
@@ -83,6 +83,13 @@ int main ()
 {    
     pios_uart_init();
     pios_uart_puts("\r\nHello Lads!\r\n\0");
+    
+    pios_gpio_pinmode ( 2, PIOS_GPIO_OUTPUT );
+    
+    pios_arm_timer_setLoad ( 0x2000 );
+    pios_arm_timer_init ( true, PIOS_ARM_TIMER_PRESCALE_256, true );
+    
+    enable_timer_irq();
     
     blinkloop();
     

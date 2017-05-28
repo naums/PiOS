@@ -48,7 +48,18 @@ OBJECTS := $(filter-out $(LIBOBJ),$(OBJECTS))
 # Rule to make the RPI1-version.
 all: 
 	$(MAKE)  rpi
-	
+
+lib: PLAT=PLATFORM_RPI 
+lib: $(BUILD) $(LIB)libpios.a
+librpi: PLAT=PLATFORM_RPI 
+librpi: $(BUILD) $(LIB)libpios.a
+
+librpi2: PLAT=PLATFORM_RPI2 
+librpi2: $(BUILD) $(LIB)libpios.a
+
+librpibp: PLAT=PLATFORM_RPIBP 
+librpibp: $(BUILD) $(LIB)libpios.a
+
 # RPI
 rpi: PLAT=PLATFORM_RPI 
 rpi: $(BUILD) $(KRNL).img

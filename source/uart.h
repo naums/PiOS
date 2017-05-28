@@ -18,6 +18,7 @@
 /// in the I/O-device memory section
 #define AUX_BASE_ADDR 0x00215000
 
+/// system clock for the baudrate calculation
 #define PIOS_AUX_SYSCLOCK 250000000
 
 /**
@@ -54,33 +55,91 @@ enum pios_aux_t
     AUX_SPI1_PEEK   = 52        ///< SPI 1 Peek
 };
 
+/// enable bit for the ENABLE-operation
 #define AUX_UART ( 1 << 0 )
+/// bit for SPI0 ENABLE-operation
 #define AUX_SPI0 ( 1 << 1 )
+/// bit for SPI1 ENABLE-operation
 #define AUX_SPI1 ( 1 << 2 )
 
+/// bit for finding out whether the Transmitter is idle
 #define AUX_TX_IDLE ( 1 << 6 )
+/// can the transmitter-queue receive another byte of data
 #define AUX_TX_EMPTY ( 1 << 5 )
+/// is the receiver overrung, i.e. were data lost
 #define AUX_RX_OVERRUN ( 1 << 1 )
+/// is there a byte in the receiver-queue?
 #define AUX_RX_DATA ( 1 << 0 )
 
+/**
+ * \brief mapping of AUX-registers, use with pios_aux_t as indices
+ **/
 extern volatile uint32_t* const pios_aux;
 
+/**
+ * \brief initiate the miniUART of the AUX-peripheral
+ **/
 void pios_uart_init ( );
+/**
+ * \brief write a string to the UART
+ * \param[in] str the string to be transmitted
+ * \param[in] len the length of the string to be sent
+ **/
 void pios_uart_write ( const char* str, size_t len );
+/**
+ * \brief read a string of data from the UART-queue
+ * \param[out] buff the buffer to be written to
+ * \param[in] len the maximal length of data to be read
+ **/
 void pios_uart_read ( char* buff, size_t len );
 
+/**
+ * \brief write a single character to the transmitter-queue
+ * \param[in] c the character to print
+ **/
 void pios_uart_putchar ( const char c );
+/**
+ * \brief read a single character from the UART
+ * \return the single character
+ **/
 uint32_t pios_uart_getchar ( );
+/**
+ * \brief set a specific baudrate to the UART
+ * \param[in] baud the wanted baudrate
+ **/
 void pios_uart_setBaud ( uint32_t baud );
+/**
+ * \brief set the data-size of the uart (7 or 8 bit)
+ * \param[in] size the data-size of the characters in bits
+ **/
 void pios_uart_setDataSize ( int size );
+/**
+ * \brief print a string to the uart
+ * \param[in] str the string to be transmitted
+ **/
 void pios_uart_puts ( const char* str );
 
+/**
+ * \brief is the receiver-queue ready?
+ **/
 bool pios_uart_rxReady ();
+/**
+ * \brief is the transmitter-queue ready?
+ **/
 bool pios_uart_txReady ();
 
+/**
+ * \brief get the receiver-queue-state
+ **/
 int pios_uart_rxQueue ();
+/**
+ * \brief get the transmitter-queue-state
+ **/
 int pios_uart_txQueue ();
 
+/**
+ * \brief wait until the transmitter is idle again, i.e. sent it's complete queue
+ **/
 void pios_uart_flush ();
 
 #endif

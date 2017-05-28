@@ -95,6 +95,7 @@ void pios_uart_setBaud ( uint32_t baud )
 void pios_uart_setDataSize ( int size )
 {
     uint32_t val = pios_aux[AUX_MU_LCR];
+    // öhm öhm öhm
     val = (val & 0xfffffffe) | ((size == 8) ? 1 : 0);   // 8 bit mode
     pios_aux[AUX_MU_LCR] = val;
 }

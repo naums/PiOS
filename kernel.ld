@@ -14,6 +14,7 @@ SECTIONS {
 	*/
 	.init 0x8000 : {
 		*(.init)
+        *(.init.*)
 	}
 	
 	/* 
@@ -21,7 +22,7 @@ SECTIONS {
 	*/
 	.text : {
 		*(.text)
-		*(.text.startup)
+		*(.text.*)
 	}
 	
 	/* 
@@ -29,6 +30,7 @@ SECTIONS {
 	*/
 	.data : {
 		*(.data)
+		*(.data.*)
 	}
 
 	.rodata : {

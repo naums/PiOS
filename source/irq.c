@@ -14,7 +14,12 @@ void enable_timer_irq ()
 
 void __attribute__((interrupt("UNDEF"))) undef_vector(void)
 {
-    printf ("UNDEF :(\n");
+    /*void* lr, *sp;
+    __asm volatile ( "mov %0, lr\n"
+                   "mov %1, sp\n"
+                   : "=r" (lr), "=r" ( sp ) );*/
+    printf ("UNDEF :( \n");
+    //printf ("SP: 0x%08x\nLR: 0x%08x\n", sp, lr);
     while( 1 )
     {
         /* Do Nothing! */

@@ -4,7 +4,10 @@ CC = $(ARM)-gcc
 AS = $(ARM)-as
 AR = $(ARM)-ar
 
-ARMGCCLIBPATH=/usr/lib/gcc/arm-none-eabi/7.1.0/
+SHELL := /bin/bash
+## find the version number of gcc (I think this is a bit too complicated :/)
+CCVERSION:=$(shell $(CC) --version | sed 's/[ ]/\n/g' | grep "\." | xargs | awk '{ print $$1 }')
+ARMGCCLIBPATH=/usr/lib/gcc/arm-none-eabi/$(CCVERSION)/
 
 # FOLDERS
 SOURCE=source/
@@ -19,7 +22,8 @@ CPUINFO=-mcpu=$(CPU) -mfpu=vfp #-march=armv6
 CCPU=-marm -mfloat-abi=hard
 
 ASOPTS=-g $(CPUINFO)
-LDOPTS=
+LIBS=-lpios -lc -lm -lgcc #-lyailfc
+LDOPTS=$(LIBS)
 CFLAGS=-std=c99 -Wall -pedantic -g $(CPUINFO) $(CCPU) -Os #-mcpu=arm1176jzf-s
 
 LIBEXCLUDE=$(BUILD)main.o\
@@ -43,7 +47,6 @@ OBJECTS := $(filter-out $(LIBOBJ),$(OBJECTS))
 
 # Rule to make the RPI1-version.
 all: 
-	echo $(LIBOBJ)
 	$(MAKE)  rpi
 	
 # RPI
@@ -98,7 +101,7 @@ $(KRNL).list : $(KRNL).elf
 $(KRNL).img : $(KRNL).elf
 	$(ARM)-objcopy $(KRNL).elf -O binary $(KRNL).img
 $(KRNL).elf : $(OBJECTS) $(LINKER) $(LIB)libpios.a
-	$(ARM)-ld --no-undefined $(OBJECTS) $(LDOPTS) -Map $(KRNL).map -o $(KRNL).elf -L $(LIB) -L $(ARMGCCLIBPATH) -lpios -lyailfc -lc -lm -lgcc -T $(KRNL).ld
+	$(ARM)-ld --no-undefined $(OBJECTS) $(LDOPTS) -Map $(KRNL).map -o $(KRNL).elf -L $(LIB) -L $(ARMGCCLIBPATH) -T $(KRNL).ld
 
 # built objectfiles from assembler or c
 $(BUILD)%.o: $(SOURCE)%.s

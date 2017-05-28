@@ -14,7 +14,7 @@
 #include <stdint.h>
 
 /// the base offset address of the GPIO-registers in memory
-#define PIOS_GPIO_BASE 0x200000;
+#define PIOS_GPIO_BASE 0x200000
 
 /// constant for the low-signal level of a pin
 #define PIOS_GPIO_LOW 0

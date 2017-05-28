@@ -1,6 +1,6 @@
 #include "uart.h"
 
-volatile uint32_t* pios_aux_reg = (volatile uint32_t*) PBASE + AUX_BASE_ADDR;
+volatile uint32_t* const pios_aux = (volatile uint32_t* const) (PBASE + AUX_BASE_ADDR);
 void dummy ( unsigned int );
 
 
@@ -17,15 +17,15 @@ void pios_uart_init ( )
     pios_gpio_pinmode ( 14, PIOS_GPIO_ALT5 );
     pios_gpio_pinmode ( 15, PIOS_GPIO_ALT5 );
     
-    pios_aux_reg[AUX_ENABLE] = AUX_UART;
-    pios_aux_reg[AUX_MU_CNTL] = 0;
-    pios_aux_reg[AUX_MU_IER] = 0;
-    pios_aux_reg[AUX_MU_LCR] = 3;
-    pios_aux_reg[AUX_MU_MCR] = 0;
-    pios_aux_reg[AUX_MU_IER] = 0;
-    pios_aux_reg[AUX_MU_IIR] = 0xc6;
-    pios_aux_reg[AUX_MU_LCR] = 1;   // 8 bit mode
-    pios_aux_reg[AUX_MU_BAUD] = 270;
+    pios_aux[AUX_ENABLE] = AUX_UART;
+    pios_aux[AUX_MU_CNTL] = 0;
+    pios_aux[AUX_MU_IER] = 0;
+    pios_aux[AUX_MU_LCR] = 3;
+    pios_aux[AUX_MU_MCR] = 0;
+    pios_aux[AUX_MU_IER] = 0;
+    pios_aux[AUX_MU_IIR] = 0xc6;
+    pios_aux[AUX_MU_LCR] = 1;   // 8 bit mode
+    pios_aux[AUX_MU_BAUD] = 270;
                 
     /**
      * set-up of Pull Up / Down: 
@@ -38,10 +38,10 @@ void pios_uart_init ( )
        * see: Manual pg 101
     **/
 
-    uint32_t p[2] = { 0, (1<<14)|(1<<15) };
+    uint32_t p[2] = { (1<<14)|(1<<15), 0 };
     pios_gpio_pullBulk ( p, PIOS_GPIO_PULL_OFF );
     
-    pios_aux_reg[AUX_MU_CNTL] = 3;
+    pios_aux[AUX_MU_CNTL] = 3;
 }
 
 void pios_uart_puts ( const char* str )
@@ -72,51 +72,51 @@ void pios_uart_putchar ( const char c )
 {
     while ( 1 ) 
     {
-        if ((pios_aux_reg[AUX_MU_LSR] & AUX_TX_EMPTY) != 0)
+        if ((pios_aux[AUX_MU_LSR] & AUX_TX_EMPTY) != 0)
             break;
     }
-    pios_aux_reg[AUX_MU_IO] = ((0xff) & c);
+    pios_aux[AUX_MU_IO] = ((0xff) & c);
 }
 
 uint32_t pios_uart_getchar ( )
 {
     while ( 1 ) 
     {
-        if ((pios_aux_reg[AUX_MU_LSR] & AUX_RX_DATA) != 0 ) 
+        if ((pios_aux[AUX_MU_LSR] & AUX_RX_DATA) != 0 ) 
             break;
     }
-    return (0xff & pios_aux_reg[AUX_MU_IO]);
+    return (0xff & pios_aux[AUX_MU_IO]);
 }
 
 void pios_uart_setBaud ( uint16_t baudfactor )
 {
-    pios_aux_reg[AUX_MU_BAUD] = baudfactor;
+    pios_aux[AUX_MU_BAUD] = baudfactor;
 }
 
 void pios_uart_setDataSize ( int size )
 {
-    uint32_t val = pios_aux_reg[AUX_MU_LCR];
+    uint32_t val = pios_aux[AUX_MU_LCR];
     val = (val & 0xfffffffe) | ((size == 8) ? 1 : 0);   // 8 bit mode
-    pios_aux_reg[AUX_MU_LCR] = val;
+    pios_aux[AUX_MU_LCR] = val;
 }
 
 bool pios_uart_rxReady ()
 {
-    return ((pios_aux_reg[AUX_MU_LSR] & AUX_RX_DATA) == 0 );
+    return ((pios_aux[AUX_MU_LSR] & AUX_RX_DATA) == 0 );
 }
 
 bool pios_uart_txReady ()
 {
-    return ((pios_aux_reg[AUX_MU_LSR] & AUX_TX_EMPTY) == 0 );
+    return ((pios_aux[AUX_MU_LSR] & AUX_TX_EMPTY) == 0 );
 }
 
 int pios_uart_rxQueue ()
 {
-    return (((0x0f000000) & pios_aux_reg[AUX_MU_STAT]) >> 24);
+    return (((0x0f000000) & pios_aux[AUX_MU_STAT]) >> 24);
 }
 int pios_uart_txQueue ()
 {
-    return (((0x000f0000) & pios_aux_reg[AUX_MU_STAT]) >> 16);
+    return (((0x000f0000) & pios_aux[AUX_MU_STAT]) >> 16);
 }
 
 

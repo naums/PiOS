@@ -61,6 +61,8 @@ enum pios_aux_t
 #define AUX_RX_OVERRUN ( 1 << 1 )
 #define AUX_RX_DATA ( 1 << 0 )
 
+extern volatile uint32_t* const pios_aux;
+
 void pios_uart_init ( );
 void pios_uart_write ( const char* str, size_t len );
 void pios_uart_read ( char* buff, size_t len );

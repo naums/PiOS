@@ -1,20 +1,21 @@
 #include "gpio.h"
 
-volatile pios_gpio_t* const pios_gpio = (volatile pios_gpio_t* const) PBASE + PIOS_GPIO_BASE;
+volatile pios_gpio_t* const pios_gpio = (volatile pios_gpio_t* const) (PBASE + PIOS_GPIO_BASE);
 
 void __attribute__((optimize("O0"))) wait ( int sec )
 {    
     while ( sec > 0 )
     {
-        int counter = 0x800000;
+        int counter = 0x400000;
         while ( counter > 0 )
             counter--; 
+        sec--;
     }
 }
 
-void __attribute__((optimize("O0"))) pios_wasteCycles ( uint32_t cycles )
+void __attribute__((optimize("O1"))) pios_wasteCycles ( uint32_t cycles )
 {
-    cycles /= 2;
+    //cycles /= 2;
     cycles++;
     while ( cycles > 0 ) { cycles--; }
 }
@@ -32,7 +33,7 @@ void pios_gpio_pullBulk ( uint32_t p[2], uint32_t pull )
         pios_gpio->pullControlClock[1] = p[1];
         pios_wasteCycles ( 150 );
         
-        pios_gpio->pullControlEnable = PIOS_GPIO_PULL_OFF;
+        //pios_gpio->pullControlEnable = PIOS_GPIO_PULL_OFF;
         pios_gpio->pullControlClock[0] = 0;
         pios_gpio->pullControlClock[1] = 0;
     }

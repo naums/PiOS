@@ -18,6 +18,8 @@
 /// in the I/O-device memory section
 #define AUX_BASE_ADDR 0x00215000
 
+#define PIOS_AUX_SYSCLOCK 250000000
+
 /**
  * \brief enum type for enumerating the registers of the AUX-peripheral of BCM2835
  * \note see section 2.1.1 in the manual

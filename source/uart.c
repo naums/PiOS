@@ -89,7 +89,7 @@ uint32_t pios_uart_getchar ( )
 
 void pios_uart_setBaud ( uint32_t baud )
 {
-    pios_aux[AUX_MU_BAUD] = (PIOS_AUX_SYSCLOCK / (baudfactor<<3)) + 1);
+    pios_aux[AUX_MU_BAUD] = (PIOS_AUX_SYSCLOCK / (baud<<3)) + 1;
 }
 
 void pios_uart_setDataSize ( int size )

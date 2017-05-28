@@ -1,7 +1,6 @@
 .section ".init"
 
 .globl start
-.global BOOTUP
 .globl blinkloop
 
 start:
@@ -61,22 +60,6 @@ halt:
 BOOTUP:
     mov pc, r0
     b halt
-
-.globl GET32
-.globl PUT32
-.globl dummy
-.globl BOOTUP
-
-PUT32:
-    str r1, [r0]
-    mov pc, lr
-
-GET32:
-    ldr r0, [r0]
-    mov pc, lr
-
-dummy:
-    mov pc, lr
 
 /** 
  * enables IRQs in the ARM-core (not FIQs)

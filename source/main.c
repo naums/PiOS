@@ -67,7 +67,7 @@ int _write ( int fd, const char* ptr, int size )
     }
 }
 
-void __attribute__ ((noreturn)) _blinkloop() 
+void __attribute__ ((noreturn)) blinkloop() 
 {
     pios_gpio_pinmode ( 2, PIOS_GPIO_OUTPUT );
 
@@ -115,7 +115,7 @@ int main ()
         putchar ( *b );
         b++;
     }
-    
+        
     printNum ( pios_aux, 16, 8 );
     printNum ( &pios_aux[AUX_MU_IO], 16, 8 );
     printNum ( AUX_MU_IO_REG, 16, 8 );
@@ -126,11 +126,11 @@ int main ()
             break;
     }
     
-    pios_uart_init();
-    pios_uart_puts("\r\nHello Lads!\r\n\0");
+    /*pios_uart_init();
+    pios_uart_puts("\r\nHello Lads!\r\n\0");*/
     
     //printf ("GPIO-address: %08x\n", pios_gpio);
-    _blinkloop();
+    blinkloop();
     
     //while ( 1 ) ;
 }

@@ -77,7 +77,8 @@ uint32_t pios_gpio_read ( uint32_t pin )
     {
         base++;
         pin -= 32;
-    }    
+    }
+    
     uint32_t val = *base;
     return ( ((val & (1<<pin)) == 0) ? PIOS_GPIO_LOW : PIOS_GPIO_HIGH );
 }
@@ -103,7 +104,6 @@ void pios_gpio_write ( uint32_t pin, uint32_t val )
         base++;
         pin -= 32;
     }
-    
     (*base) = 1 << pin;
 }
 
@@ -129,7 +129,7 @@ void pios_gpio_pinmode ( uint32_t pin, uint32_t val )
     }
     
     uint32_t v = *base;
-    v &= (7 << ((pin<<1) + pin));    /// move the 7 pin*3 times, so it masks the correct bits
+    v &= ~(7 << ((pin<<1) + pin));    /// move the 7 pin*3 times, so it masks the correct bits
     v |= (val << ((pin<<1) + pin));
     *base = v;
 }

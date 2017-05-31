@@ -28,7 +28,7 @@ LDOPTS=$(LIBS)
 CFLAGS=-std=c99 -Wall -pedantic -g $(CPUINFO) $(CCPU) -I$(INC) -Os #-mcpu=arm1176jzf-s
 
 LIBEXCLUDE=$(BUILD)main.o\
-           $(BUILD)irq.o\
+           $(BUILD)cpu_exception.o\
            $(BUILD)start.o\
            $(BUILD)syscalls.o
 

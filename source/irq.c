@@ -1,72 +1,36 @@
-#include "irq.h"
-#include "gpio.h"
-#include "timer.h"
+#include <pios/irq.h>
 
-static struct rpi_irq_controller_t* rpiIRQController = (struct rpi_irq_controller_t*)IRQ_BASE;
+volatile pios_irq_controller_t* const pios_irq_controller = (volatile pios_irq_controller_t* const) (PBASE + PIOS_IRQ_BASE);
 
-struct rpi_irq_controller_t* RPI_GetIrqController( void )
+void pios_irq_enable()
 {
-    return rpiIRQController;
+    __asm volatile (
+        "mrs r0, cpsr\n"
+        "bic r0, r0, #0x80\n"
+        "msr cpsr_c, r0\n" );
+}
+void pios_fiq_enable()
+{
+    __asm volatile (
+        "mrs r0, cpsr\n"
+        "bic r0, r0, #0x40\n"
+        "msr cpsr_c, r0\n" );
 }
 
-void enable_timer_irq ()
+void pios_irq_disable ()
 {
-    RPI_GetIrqController()->Enable_Basic_IRQs = RPI_BASIC_ARM_TIMER_IRQ;
+    __asm volatile (
+        "mrs r0, cpsr\n"
+        "orr r0, r0, #0x80\n"
+        "msr cpsr_c, r0\n" );
 }
 
-void __attribute__((interrupt("UNDEF"))) undef_vector(void)
+void pios_fiq_disable ()
 {
-    /*void* lr, *sp;
-    __asm volatile ( "mov %0, lr\n"
-                   "mov %1, sp\n"
-                   : "=r" (lr), "=r" ( sp ) );*/
-    printf ("UNDEF :( \n");
-    //printf ("SP: 0x%08x\nLR: 0x%08x\n", sp, lr);
-    while( 1 )
-    {
-        /* Do Nothing! */
-    }
+    __asm volatile (
+        "mrs r0, cpsr\n"
+        "orr r0, r0, #0x40\n"
+        "msr cpsr_c, r0\n" );
 }
-void __attribute__((interrupt("IRQ"))) irq_vector(void)
-{
-    static int val = PIOS_GPIO_HIGH;
-    //void* lr, *sp;
-    /*asm volatile ( "mov %0, lr\n"
-                   "mov %1, sp\n"
-                   : "=r" (lr), "=r" ( sp ) );*/
-    pios_uart_puts (" -> ! IRQ :) \n");
-    
-    pios_arm_timer->irqack = 1;
-    val = ((val == PIOS_GPIO_HIGH) ? PIOS_GPIO_LOW : PIOS_GPIO_HIGH);
-    pios_gpio_write ( 2, val );
-    
-}
-void __attribute__((interrupt("FIQ"))) fiq_vector(void)
-{
-    printf ("FIQ :( \n");
-    while( 1 )
-    {
-        /* Do Nothing! */
-    }
-}
-void __attribute__((interrupt("SWI"))) swi_vector(void)
-{
-    void* lr, *sp;
-    __asm volatile ( "mov %0, lr\n"
-                   "mov %1, sp\n"
-                   : "=r" (lr), "=r" ( sp ) );
-    printf (" -> ! SWI :( \n");
-    printf ("SP: 0x%08x\nLR: 0x%08x\n", sp, lr);
-    while( 1 )
-    {
-        /* Do Nothing! */
-    }
-}
-void __attribute__((interrupt("ABORT"))) abort_vector(void)
-{
-    printf ("ABORT :(\n");
-    while( 1 )
-    {
-        /* Do Nothing! */
-    }
-}
+
+

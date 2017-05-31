@@ -1,5 +1,5 @@
-#include "i2c.h"
-#include "native_io.h"
+#include <pios/i2c.h>
+#include <pios/native_io.h>
 
 volatile pios_i2c_t* const pios_i2c = (volatile pios_i2c_t* const) PBASE + PIOS_I2C_BASE;
 

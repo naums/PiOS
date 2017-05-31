@@ -1,8 +1,9 @@
-#include "uart.h"
-//#include "image.h"
-#include "lcd.h"
-#include "gpio.h"
-#include "timer.h"
+#include <pios/uart.h>
+#include <pios/lcd.h>
+#include <pios/gpio.h>
+#include <pios/timer.h>
+
+#include <pios/irq.h>
 
 #include <stdio.h>
 
@@ -59,12 +60,14 @@ uint32_t printNum ( uint32_t num, uint32_t base, uint32_t length )
 }
 
 
-int _write ( int fd, const char* ptr, int size )
+int _write ( int fd, const char* ptr, size_t size )
 {
-    for ( int i=0; i<size; i++ )
+    size_t i=0;
+    for ( ; i<size; i++ )
     {
         pc( ptr[i] );
     }
+    return i;
 }
 
 void __attribute__ ((noreturn)) blinkloop() 
@@ -89,7 +92,7 @@ int main ()
     pios_arm_timer_setLoad ( 0x2000 );
     pios_arm_timer_init ( true, PIOS_ARM_TIMER_PRESCALE_256, true );
     
-    enable_timer_irq();
+    PIOS_ARM_TIMER_INTERRUPT_ENABLE();
     
     blinkloop();
     

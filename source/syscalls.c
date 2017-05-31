@@ -68,7 +68,7 @@ initialise_monitor_handles (void)
 int _read (int file, char * ptr, int len)
 {
     /** TODO: read from buffer **/
-    
+    return 0;
 }
 
 
@@ -90,7 +90,8 @@ int _close (int file)
 
 void _exit (int n)
 {
-    blinkloop();
+    //blinkloop();
+    while (1);
 }
 
 int _kill (int n, int m)

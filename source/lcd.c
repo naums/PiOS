@@ -1,4 +1,4 @@
-#include "lcd.h"
+#include <pios/lcd.h>
 
 enum _pios_lcd_command_t lcd_bitmode;
 

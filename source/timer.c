@@ -1,4 +1,4 @@
-#include "timer.h"
+#include <pios/timer.h>
 
 volatile pios_arm_timer_t* const pios_arm_timer = (volatile pios_arm_timer_t* const) (PBASE + PIOS_ARM_TIMER_BASE);
 

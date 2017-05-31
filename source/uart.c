@@ -1,4 +1,4 @@
-#include "uart.h"
+#include <pios/uart.h>
 
 volatile uint32_t* const pios_aux = (volatile uint32_t* const) (PBASE + AUX_BASE_ADDR);
 

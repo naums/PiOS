@@ -21,10 +21,11 @@ CPU=arm1176jzf-s
 CPUINFO=-mcpu=$(CPU) -mfpu=vfp #-march=armv6
 CCPU=-marm -mfloat-abi=hard
 
+INC=include
 ASOPTS=-g $(CPUINFO)
 LIBS=-lpios -lc -lm -lgcc #-lyailfc
 LDOPTS=$(LIBS)
-CFLAGS=-std=c99 -Wall -pedantic -g $(CPUINFO) $(CCPU) -Os #-mcpu=arm1176jzf-s
+CFLAGS=-std=c99 -Wall -pedantic -g $(CPUINFO) $(CCPU) -I$(INC) -Os #-mcpu=arm1176jzf-s
 
 LIBEXCLUDE=$(BUILD)main.o\
            $(BUILD)irq.o\

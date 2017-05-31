@@ -14,13 +14,13 @@ start:
     ldr pc, _fast_interrupt_vector_h
 
 _reset_h:                           .word   _reset_
-_undefined_instruction_vector_h:    .word   undef_vector
-_software_interrupt_vector_h:       .word   swi_vector
-_prefetch_abort_vector_h:           .word   abort_vector
-_data_abort_vector_h:               .word   abort_vector
+_undefined_instruction_vector_h:    .word   pios_exception_undef
+_software_interrupt_vector_h:       .word   pios_exception_swi
+_prefetch_abort_vector_h:           .word   pios_exception_abort
+_data_abort_vector_h:               .word   pios_exception_abort
 _unused_handler_h:                  .word   _reset_
-_interrupt_vector_h:                .word   irq_vector
-_fast_interrupt_vector_h:           .word   fiq_vector
+_interrupt_vector_h:                .word   pios_exception_irq
+_fast_interrupt_vector_h:           .word   pios_exception_fiq
 
 _reset_:
 	// Setup the stack.
@@ -41,9 +41,7 @@ _reset_:
     stmia   r1!,{r2, r3, r4, r5, r6, r7, r8, r9}    /** store 32 Byte **/
     ldmia   r0!,{r2, r3, r4, r5, r6, r7, r8, r9}
     stmia   r1!,{r2, r3, r4, r5, r6, r7, r8, r9}
-    
-    bl pios_irq_enable
-    
+        
     /* I don't really need a framebuffer right now
     ldr r0, =1920
     ldr r1, =1080
@@ -60,13 +58,3 @@ halt:
 BOOTUP:
     mov pc, r0
     b halt
-
-/** 
- * enables IRQs in the ARM-core (not FIQs)
- **/
-pios_irq_enable:
-    mrs r0, cpsr
-    bic r0, r0, #0x80
-    msr cpsr_c, r0
-    
-    mov pc, lr     

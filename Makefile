@@ -130,7 +130,7 @@ $(KRNL).elf: $(OBJECTS) $(LIB)libpios.a
 	$(ARM)-ld --no-undefined $(OBJECTS) $(LDOPTS) -Map $(KRNL).map -o $(KRNL).elf -L $(LIB) -L $(ARMGCCLIBPATH) -T $(LDSCRIPT)
 
 $(QEMU)%.o: $(SOURCE)qemu/%.c
-	$(CC) -D$(PLAT) -I $(SOURCE) $(CFLAGS) $< -c -o $@
+	$(CC) -D$(PLAT) $(CFLAGS) $< -c -o $@
 $(QEMU)%.o: $(SOURCE)qemu/%.s
 	$(AS) -I $(SOURCE) $(ASOPTS) $< -o $@
 
@@ -149,6 +149,6 @@ $(BUILD):
 
 # delete the created files
 clean : 
-	rm $(BUILD)*.o
-	rm $(KRNL).img $(KRNL).elf $(KRNL)
-	rm $(KRNL).list $(KRNL).map
+	-rm $(BUILD)*.o
+	-rm $(KRNL).img $(KRNL).elf $(KRNL)
+	-rm $(KRNL).list $(KRNL).map

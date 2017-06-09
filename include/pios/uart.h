@@ -14,68 +14,6 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-/// will be used as offset with the PBASE-address to get the AUX address 
-/// in the I/O-device memory section
-#define AUX_BASE_ADDR 0x00215000
-
-/// system clock for the baudrate calculation
-#define PIOS_AUX_SYSCLOCK 250000000
-
-/**
- * \brief enum type for enumerating the registers of the AUX-peripheral of BCM2835
- * \note see section 2.1.1 in the manual
- **/
-enum pios_aux_t
-{
-    AUX_IRQ         =  0,       ///< AUX Interrupt status (for hierarchical source-detection)
-    AUX_ENABLE      =  1,       ///< AUX enable (last 3 bits: SPI2, SPI1, UART [2,1,0])
-    
-    AUX_MU_IO       = 16,       ///< UART I/O Data
-    AUX_MU_IER      = 17,       ///< UART IRQ Enable
-    AUX_MU_IIR      = 18,       ///< UART IRQ Identify
-    AUX_MU_LCR      = 19,       ///< UART Line Control
-    AUX_MU_MCR      = 20,       ///< UART Modem Control
-    AUX_MU_LSR      = 21,       ///< UART Line Status
-    AUX_MU_MSR      = 22,       ///< UART Modem Status
-    AUX_MU_SCRATCH  = 23,       ///< UART Scratch ( an extra 8 bit buffer(?) )
-    AUX_MU_CNTL     = 24,       ///< UART Extra Control
-    AUX_MU_STAT     = 25,       ///< UART Extra Status
-    AUX_MU_BAUD     = 26,       ///< UART Baudrate
-    
-    AUX_SPI0_CNTL0  = 32,       ///< SPI 0 Control Register 0
-    AUX_SPI0_CNTL1  = 33,       ///< SPI 0 Control Register 1
-    AUX_SPI0_STAT   = 34,       ///< SPI 0 Status
-    AUX_SPI0_IO     = 35,       ///< SPI 0 Data
-    AUX_SPI0_PEEK   = 36,       ///< SPI 0 Peek
-    
-    AUX_SPI1_CNTL0  = 48,       ///< SPI 1 Control Register 0
-    AUX_SPI1_CNTL1  = 49,       ///< SPI 1 Control Register 1
-    AUX_SPI1_STAT   = 50,       ///< SPI 1 Status
-    AUX_SPI1_IO     = 51,       ///< SPI 1 Data
-    AUX_SPI1_PEEK   = 52        ///< SPI 1 Peek
-};
-
-/// enable bit for the ENABLE-operation
-#define AUX_UART ( 1 << 0 )
-/// bit for SPI0 ENABLE-operation
-#define AUX_SPI0 ( 1 << 1 )
-/// bit for SPI1 ENABLE-operation
-#define AUX_SPI1 ( 1 << 2 )
-
-/// bit for finding out whether the Transmitter is idle
-#define AUX_TX_IDLE ( 1 << 6 )
-/// can the transmitter-queue receive another byte of data
-#define AUX_TX_EMPTY ( 1 << 5 )
-/// is the receiver overrung, i.e. were data lost
-#define AUX_RX_OVERRUN ( 1 << 1 )
-/// is there a byte in the receiver-queue?
-#define AUX_RX_DATA ( 1 << 0 )
-
-/**
- * \brief mapping of AUX-registers, use with pios_aux_t as indices
- **/
-extern volatile uint32_t* const pios_aux;
-
 /**
  * \brief initiate the miniUART of the AUX-peripheral
  **/

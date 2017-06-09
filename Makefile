@@ -13,11 +13,12 @@ ARMGCCLIBPATH=/usr/lib/gcc/arm-none-eabi/$(CCVERSION)/
 SOURCE=source/
 BUILD=build/
 LIB=lib/
+QEMU=build/qemu/
 
 
 # OPTIONS for AS, CC and LD
 # todo: tweak for RPI, RPIB+, RPI2, RPI3
-CPU=arm1176jzf-s
+CPU=arm926ej-s#arm1176jzf-s
 CPUINFO=-mcpu=$(CPU) -mfpu=vfp #-march=armv6
 CCPU=-marm -mfloat-abi=hard
 
@@ -25,12 +26,15 @@ INC=include
 ASOPTS=-g $(CPUINFO)
 LIBS=-lpios -lc -lm -lgcc #-lyailfc
 LDOPTS=$(LIBS)
-CFLAGS=-std=c99 -Wall -pedantic -g $(CPUINFO) $(CCPU) -I$(INC) -Os #-mcpu=arm1176jzf-s
+CFLAGS=-std=c99 -Wall -pedantic -g $(CPUINFO) $(CCPU) -I$(INC) -O2 #-mcpu=arm1176jzf-s
 
 LIBEXCLUDE=$(BUILD)main.o\
            $(BUILD)cpu_exception.o\
            $(BUILD)start.o\
            $(BUILD)syscalls.o
+
+QEMUEXCLUDE = $(BUILD)uart.o \
+              $(BUILD)start.o
 
 LIBC=lib/libc.a
 LIBM=lib/libm.a
@@ -40,11 +44,17 @@ NEWLIB_PREP=$(NEWLIB)/newlib/libc/sys/arm/
 
 # KERNELNAME
 KRNL=kernel
+LDSCRIPT=$(KRNL).ld
 
 # gather all s and c files
 OBJECTS := $(patsubst $(SOURCE)%.s,$(BUILD)%.o, $(patsubst $(SOURCE)%.c,$(BUILD)%.o, $(wildcard $(SOURCE)*.s) $(wildcard $(SOURCE)*.c)))
 LIBOBJ := $(filter-out $(LIBEXCLUDE),$(OBJECTS))
 OBJECTS := $(filter-out $(LIBOBJ),$(OBJECTS))
+
+QOBJ := $(filter-out $(QEMUEXCLUDE), $(OBJECTS)) $(QEMU)start.o
+QLIB := $(filter-out $(QEMUEXCLUDE), $(LIBOBJ)) $(QEMU)uart.o 
+
+PLAT=PLATFORM_RPI 
 
 # Rule to make the RPI1-version.
 all: 
@@ -72,6 +82,11 @@ rpi2: $(BUILD) $(KRNL).img
 # RPI B+
 rpibp: PLAT=PLATFORM_RPIBP 
 rpibp: $(BUILD) $(KRNL).img 
+
+qemu: OBJECTS := $(QOBJ)
+qemu: LIBOBJ  := $(QLIB)
+qemu: LDSCRIPT = qemu.ld
+qemu: $(BUILD) $(KRNL).img
 
 # build newlib
 # TARGET_CC="arm-none-eabi-gcc"
@@ -103,19 +118,23 @@ yailfc_clean:
 	rm $(LIB)libyailfc.a
 	cd $(LIB)yailfc && \
 		make clean
-
 # make a listing from the kernel.elf file
 dump: $(BUILD) $(KRNL).elf $(KRNL).list
 $(KRNL).list : $(KRNL).elf
 	$(ARM)-objdump -d $(KRNL).elf > $(KRNL).list
 
 # make the kernel-image
-$(KRNL).img : $(KRNL).elf
+$(KRNL).img: $(KRNL).elf
 	$(ARM)-objcopy $(KRNL).elf -O binary $(KRNL).img
-$(KRNL).elf : $(OBJECTS) $(LINKER) $(LIB)libpios.a
-	$(ARM)-ld --no-undefined $(OBJECTS) $(LDOPTS) -Map $(KRNL).map -o $(KRNL).elf -L $(LIB) -L $(ARMGCCLIBPATH) -T $(KRNL).ld
+$(KRNL).elf: $(OBJECTS) $(LIB)libpios.a	
+	$(ARM)-ld --no-undefined $(OBJECTS) $(LDOPTS) -Map $(KRNL).map -o $(KRNL).elf -L $(LIB) -L $(ARMGCCLIBPATH) -T $(LDSCRIPT)
 
-# built objectfiles from assembler or c
+$(QEMU)%.o: $(SOURCE)qemu/%.c
+	$(CC) -D$(PLAT) -I $(SOURCE) $(CFLAGS) $< -c -o $@
+$(QEMU)%.o: $(SOURCE)qemu/%.s
+	$(AS) -I $(SOURCE) $(ASOPTS) $< -o $@
+
+# build objectfiles from assembler or c
 $(BUILD)%.o: $(SOURCE)%.s
 	$(AS) -I $(SOURCE) $(ASOPTS) $< -o $@
 $(BUILD)%.o: $(SOURCE)%.c

@@ -13,14 +13,12 @@ ARMGCCLIBPATH=/usr/lib/gcc/arm-none-eabi/$(CCVERSION)/
 SOURCE=source/
 BUILD=build/
 LIB=lib/
-QEMU=build/qemu/
+QEMU=build/qemu_
 
 
 # OPTIONS for AS, CC and LD
 # todo: tweak for RPI, RPIB+, RPI2, RPI3
-CPU=arm926ej-s#arm1176jzf-s
-CPUINFO=-mcpu=$(CPU) -mfpu=vfp #-march=armv6
-CCPU=-marm -mfloat-abi=hard
+CPU=arm1176jzf-s
 
 INC=include
 ASOPTS=-g $(CPUINFO)
@@ -33,8 +31,7 @@ LIBEXCLUDE=$(BUILD)main.o\
            $(BUILD)start.o\
            $(BUILD)syscalls.o
 
-QEMUEXCLUDE = $(BUILD)uart.o \
-              $(BUILD)start.o
+QEMUEXCLUDE = $(BUILD)start.o
 
 LIBC=lib/libc.a
 LIBM=lib/libm.a
@@ -47,18 +44,29 @@ KRNL=kernel
 LDSCRIPT=$(KRNL).ld
 
 # gather all s and c files
-OBJECTS := $(patsubst $(SOURCE)%.s,$(BUILD)%.o, $(patsubst $(SOURCE)%.c,$(BUILD)%.o, $(wildcard $(SOURCE)*.s) $(wildcard $(SOURCE)*.c)))
+OBJECTS := $(filter-out $(QEMU)start.o, $(patsubst $(SOURCE)%.s,$(BUILD)%.o, $(patsubst $(SOURCE)%.c,$(BUILD)%.o, $(wildcard $(SOURCE)*.s) $(wildcard $(SOURCE)*.c))))
 LIBOBJ := $(filter-out $(LIBEXCLUDE),$(OBJECTS))
 OBJECTS := $(filter-out $(LIBOBJ),$(OBJECTS))
 
 QOBJ := $(filter-out $(QEMUEXCLUDE), $(OBJECTS)) $(QEMU)start.o
-QLIB := $(filter-out $(QEMUEXCLUDE), $(LIBOBJ)) $(QEMU)uart.o 
+
+all: 
+	$(MAKE)  rpi
 
 PLAT=PLATFORM_RPI 
 
-# Rule to make the RPI1-version.
-all: 
-	$(MAKE)  rpi
+qemu: PLAT=PLATFORM_QEMU
+qemu: OBJECTS := $(QOBJ)
+qemu: LDSCRIPT = qemu.ld
+qemu: CPU=arm926ej-s
+qemu: $(BUILD) $(KRNL).img
+
+libqemu: PLAT=PLATFORM_QEMU
+libqemu: CPU=arm926ej-s
+libqemu: $(BUILD) $(LIB)libpios.a
+
+CPUINFO=-mcpu=$(CPU) -mfpu=vfp #-march=armv6
+CCPU=-marm -mfloat-abi=hard
 
 lib: PLAT=PLATFORM_RPI 
 lib: $(BUILD) $(LIB)libpios.a
@@ -82,11 +90,6 @@ rpi2: $(BUILD) $(KRNL).img
 # RPI B+
 rpibp: PLAT=PLATFORM_RPIBP 
 rpibp: $(BUILD) $(KRNL).img 
-
-qemu: OBJECTS := $(QOBJ)
-qemu: LIBOBJ  := $(QLIB)
-qemu: LDSCRIPT = qemu.ld
-qemu: $(BUILD) $(KRNL).img
 
 # build newlib
 # TARGET_CC="arm-none-eabi-gcc"
@@ -129,9 +132,9 @@ $(KRNL).img: $(KRNL).elf
 $(KRNL).elf: $(OBJECTS) $(LIB)libpios.a	
 	$(ARM)-ld --no-undefined $(OBJECTS) $(LDOPTS) -Map $(KRNL).map -o $(KRNL).elf -L $(LIB) -L $(ARMGCCLIBPATH) -T $(LDSCRIPT)
 
-$(QEMU)%.o: $(SOURCE)qemu/%.c
-	$(CC) -D$(PLAT) $(CFLAGS) $< -c -o $@
-$(QEMU)%.o: $(SOURCE)qemu/%.s
+$(QEMU)%.o: $(SOURCE)qemu_%.c
+	$(CC) -D$(PLAT) -I $(SOURCE) $(CFLAGS) $< -c -o $@
+$(QEMU)%.o: $(SOURCE)qemu_%.s
 	$(AS) -I $(SOURCE) $(ASOPTS) $< -o $@
 
 # build objectfiles from assembler or c
@@ -141,6 +144,7 @@ $(BUILD)%.o: $(SOURCE)%.c
 	$(CC) -D$(PLAT) -I $(SOURCE) -I $(LIB)yailfc/src $(CFLAGS) $< -c -o $@
 
 $(LIB)libpios.a: $(LIBOBJ)
+	echo $(LIBOBJ)
 	$(AR) rcv $(LIB)libpios.a $(LIBOBJ)
 
 # create the build-folder

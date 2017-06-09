@@ -21,5 +21,8 @@
         #define PBASE 0x3F000000
         /// name of the "board" for writing in human readable name
         #define PNAME "Raspberry Pi 2"
-    #endif
+    #else
+        #define PBASE 0x0
+        #define PNAME "Invalid"    
+    #endif    
 #endif

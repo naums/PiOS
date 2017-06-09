@@ -1,5 +1,7 @@
 #include <pios/uart.h>
 
+#ifndef PLATFORM_QEMU
+
 /// will be used as offset with the PBASE-address to get the AUX address 
 /// in the I/O-device memory section
 #define AUX_BASE_ADDR 0x00215000
@@ -172,4 +174,5 @@ int pios_uart_txQueue ()
     return (((0x000f0000) & pios_aux[AUX_MU_STAT]) >> 16);
 }
 
+#endif
 

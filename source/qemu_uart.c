@@ -6,6 +6,8 @@
 
 #include "pios/uart.h"
 
+#ifdef PLATFORM_QEMU
+
 #define PIOS_QEMU_UART_BASE 0x101f1000
 
 enum _pios_qemu_uart_t
@@ -100,4 +102,4 @@ int pios_uart_txQueue () {}
 void pios_uart_setBaud ( uint32_t baud ) {}
 void pios_uart_setDataSize ( int size ) {}
 
-
+#endif

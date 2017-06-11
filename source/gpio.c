@@ -1,6 +1,6 @@
 #include <pios/gpio.h>
 
-volatile pios_gpio_t* const pios_gpio = (volatile pios_gpio_t* const) (PBASE + PIOS_GPIO_BASE);
+volatile pios_gpio_t* const pios_gpio = (volatile pios_gpio_t* const) (PIOS_IO_BASE + PIOS_GPIO_BASE);
 
 void __attribute__((optimize("O0"))) wait ( int sec )
 {    

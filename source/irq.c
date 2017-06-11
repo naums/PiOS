@@ -1,6 +1,6 @@
 #include <pios/irq.h>
 
-volatile pios_irq_controller_t* const pios_irq_controller = (volatile pios_irq_controller_t* const) (PBASE + PIOS_IRQ_BASE);
+volatile pios_irq_controller_t* const pios_irq_controller = (volatile pios_irq_controller_t* const) (PIOS_IO_BASE + PIOS_IRQ_BASE);
 
 void pios_irq_enable()
 {

@@ -13,8 +13,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
-#include "platform.h"
-#include "gpio.h"
+#include <pios_port_config.h>
+#include <pios/gpio.h>
 
 /// base clock rate used for calculation of the frequency; normally 150MHz
 #define PIOS_I2C_CLOCKRATE 150000000

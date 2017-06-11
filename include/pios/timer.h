@@ -11,8 +11,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "platform.h"
-#include "irq.h"
+#include <pios_port_config.h>
+#include "pios/irq.h"
 
 #define PIOS_ARM_TIMER_INTERRUPT_ENABLE() pios_irq_controller->basic_enable = PIOS_IRQ_BASIC_ARM_TIMER_IRQ;
 

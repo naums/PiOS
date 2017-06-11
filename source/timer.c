@@ -1,6 +1,6 @@
 #include <pios/timer.h>
 
-volatile pios_arm_timer_t* const pios_arm_timer = (volatile pios_arm_timer_t* const) (PBASE + PIOS_ARM_TIMER_BASE);
+volatile pios_arm_timer_t* const pios_arm_timer = (volatile pios_arm_timer_t* const) (PIOS_IO_BASE + PIOS_ARM_TIMER_BASE);
 
 void pios_arm_timer_init ( uint32_t irq, uint32_t prescaler, uint32_t enable)
 {

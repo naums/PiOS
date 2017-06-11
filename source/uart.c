@@ -1,6 +1,6 @@
 #include <pios/uart.h>
 
-#ifndef PLATFORM_QEMU
+#ifdef PIOS_PLATFORM_RPI
 
 /// will be used as offset with the PBASE-address to get the AUX address 
 /// in the I/O-device memory section
@@ -64,7 +64,7 @@ enum pios_aux_t
  **/
 extern volatile uint32_t* const pios_aux;
 
-volatile uint32_t* const pios_aux = (volatile uint32_t* const) (PBASE + AUX_BASE_ADDR);
+volatile uint32_t* const pios_aux = (volatile uint32_t* const) (PIOS_IO_BASE + AUX_BASE_ADDR);
 
 void pios_uart_init ( )
 {    

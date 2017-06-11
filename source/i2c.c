@@ -1,7 +1,7 @@
 #include <pios/i2c.h>
 #include <pios/native_io.h>
 
-volatile pios_i2c_t* const pios_i2c = (volatile pios_i2c_t* const) PBASE + PIOS_I2C_BASE;
+volatile pios_i2c_t* const pios_i2c = (volatile pios_i2c_t* const) (PIOS_IO_BASE + PIOS_I2C_BASE);
 
 
 void pios_i2c_enable ()

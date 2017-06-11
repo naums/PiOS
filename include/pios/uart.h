@@ -8,8 +8,8 @@
 #ifndef PIOS_UART
 #define PIOS_UART
 
-#include "platform.h"
-#include "gpio.h"
+#include <pios_port_config.h>
+#include "pios/gpio.h"
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>

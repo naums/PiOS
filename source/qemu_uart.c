@@ -6,7 +6,7 @@
 
 #include "pios/uart.h"
 
-#ifdef PLATFORM_QEMU
+#ifdef PIOS_PLATFORM_QEMU
 
 #define PIOS_QEMU_UART_BASE 0x101f1000
 

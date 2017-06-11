@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include <pios/platform.h>
+#include <pios_port_config.h>
 
 /// the offset address of the IRQ-controller (offset from I/O base address (PBASE))
 #define PIOS_IRQ_BASE 0xB200 

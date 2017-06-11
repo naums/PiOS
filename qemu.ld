@@ -2,7 +2,7 @@ ENTRY(start)
 SECTIONS
 {
  . = 0x10000;
- .init . : { build/qemu/start.o(.text) }
+ .init . : { build/qemu_start.o(.text) }
  .text : { *(.text) }
  .data : { *(.data) }
  .bss : { *(.bss COMMON) }

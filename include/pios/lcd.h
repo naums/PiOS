@@ -9,8 +9,8 @@
 #ifndef PIOS_LCD1602
 #define PIOS_LCD1602
 
-#include "i2c.h"
-#include "gpio.h"
+#include "pios/i2c.h"
+#include "pios/gpio.h"
 
 #include <stdint.h>
 #include <stddef.h>

@@ -10,7 +10,7 @@
 #ifndef PIOS_GPIO
 #define PIOS_GPIO
 
-#include "platform.h"
+#include <pios_port_config.h>
 #include <stdint.h>
 
 /// the base offset address of the GPIO-registers in memory

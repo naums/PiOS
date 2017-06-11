@@ -19,3 +19,18 @@ The following device-drivers might not work as expected:
 * Interface to an LCD character display
 
 I'm thinking about an interface for adding functions to specific interrupt service routines and also about a generic driver interface.
+
+## Building
+
+First you have to decide what target you want to build for. See the subdirectory boards. For example, you may want to build for a QEMU virtual machine, then go into the folder boards/qemu/ and take every file (board.mk and pios_port_config.h) and put it into the root-folder of the repository.
+
+Then go ahead and:
+- ```git submodule init && git submodule update``` for fetching the newlib-sources
+- ```make newlib```for building newlib
+- ```make``` for building the libpios-Library and the operating system kernel
+
+If you only want to build libpios.a then you just need to call ```make lib```. 
+
+Make sure to always build with a consistent board.mk and pios_port_config.h-definitions! Changing or swapping these half way through might result in unexpected behaviour, but that is to be expected then. 
+
+

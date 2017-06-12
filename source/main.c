@@ -5,6 +5,8 @@
 
 #include <pios/irq.h>
 
+#include "pios_port_config.h"
+
 #include <stdio.h>
 
 #define pc pios_uart_putchar
@@ -72,12 +74,12 @@ int _write ( int fd, const char* ptr, size_t size )
 
 void __attribute__ ((noreturn)) blinkloop() 
 {
-    pios_gpio_pinmode ( 3, PIOS_GPIO_OUTPUT );
+    pios_gpio_pinmode ( PIOS_IO_ACT_LED, PIOS_GPIO_OUTPUT );
     while ( 1 )
     {
-        pios_gpio_write ( 3, PIOS_GPIO_LOW );
+        pios_gpio_write ( PIOS_IO_ACT_LED, PIOS_GPIO_LOW );
         wait(1);
-        pios_gpio_write ( 3, PIOS_GPIO_HIGH );
+        pios_gpio_write ( PIOS_IO_ACT_LED, PIOS_GPIO_HIGH );
         wait(1);
     }
 }
@@ -86,7 +88,9 @@ int main ()
 {    
     pios_uart_init();
     pios_uart_puts("\r\nHello Lads!\r\n\0");
-    
+
+	pios_jtag_init();
+
     /*pios_gpio_pinmode ( 2, PIOS_GPIO_OUTPUT );
     
     pios_arm_timer_setLoad ( 0x2000 );

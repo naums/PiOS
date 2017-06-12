@@ -12,12 +12,6 @@ int pios_jtag_init ()
     uint32_t p[2] = {0xff, 0xff};
     pios_gpio_pullBulk ( p, PIOS_GPIO_PULL_OFF );
     
-    /*
-    pios_gpio_pullControl ( pios_jtag_tck, PIOS_GPIO_PULL_OFF );
-    pios_gpio_pullControl ( pios_jtag_tdi, PIOS_GPIO_PULL_OFF );
-    pios_gpio_pullControl ( pios_jtag_tdo, PIOS_GPIO_PULL_OFF );
-    pios_gpio_pullControl ( pios_jtag_tms, PIOS_GPIO_PULL_OFF );*/
-    
     pios_gpio_pinmode ( pios_jtag_tck, PIOS_GPIO_ALT4 );
     pios_gpio_pinmode ( pios_jtag_tdi, PIOS_GPIO_ALT5 );
     pios_gpio_pinmode ( pios_jtag_tdo, PIOS_GPIO_ALT4 );

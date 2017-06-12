@@ -25,17 +25,17 @@ I'm thinking about an interface for adding functions to specific interrupt servi
 First you have to decide what target you want to build for. See the subdirectory boards. For example, you may want to build for a QEMU virtual machine, then go into the folder boards/qemu/ and take every file (board.mk and pios_port_config.h) and put it into the root-folder of the repository.
 
 Then go ahead and:
-- ```git submodule init && git submodule update``` for fetching the newlib-sources
-- ```make newlib```for building newlib
-- ```make``` for building the libpios-Library and the operating system kernel
+- `git submodule init && git submodule update` for fetching the newlib-sources
+- `make newlib`for building newlib
+- `make` for building the libpios-Library and the operating system kernel
 
-If you only want to build libpios.a then you just need to call ```make lib```. 
+If you only want to build libpios.a then you just need to call `make lib`. 
 
 Make sure to always build with a consistent board.mk and pios_port_config.h-definitions! Changing or swapping these half way through might result in unexpected behaviour, but that is to be expected then. 
 
 ## JTAG debugging
 
-PiOS supports JTAG-debugging. You need to initialize the correct Pins of the Raspberry Pi with ```pios_jtag_init```, these are the following pins:
+PiOS supports JTAG-debugging. You need to initialize the correct Pins of the Raspberry Pi with `pios_jtag_init`, these are the following pins:
 
 | BCM Pin Number | Pin-number on the header | JTAG-Pin Use | ALT-value |
 | ---------------|--------------------------|--------------|-----------|

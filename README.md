@@ -53,14 +53,14 @@ I personally use the FT232H mini module and use the openocd-configuration files 
 | TDI  | CN2-10   | P1-7         |
 | TDO  | CN2-9    | P1-18        |
 | TMS  | CN2-12   | P1-13        |
-| UART:                          |
+| **UART:**                      |
 | TXRX | CN3-26   | P1-10        |
 | RXTX | CN3-25   | P1-8         |
-| Ground:                        |
+| **Ground:**                    |
 | GND  | CN2-2    | P1-6         |
-| Raspi to Raspi:                |
+| **Raspi to Raspi:**            |
 | TRST |  P1-1    | P1-15        |
-| FTDI board to FTDI board:      |
+| **FTDI board to FTDI board:**  |
 | VCCIO | CN2-1   | CN2-11       |
 | VCC   | CN3-1   | CN3-3        |
 

@@ -72,12 +72,12 @@ void pios_uart_putchar ( const char c )
     }
     pios_qemu_uart[QEMU_UART_DR] = c;
 }
+
 uint32_t pios_uart_getchar ( )
 {
-    while (1)
+    while ( (pios_qemu_uart[QEMU_UART_FR] & (1 << 4)) != 0)
     {
-        if ( (pios_qemu_uart[QEMU_UART_FR] & (1 << 4)) != 0 )     /// receive FIFO empty?
-            break;
+
     }
     return pios_qemu_uart[QEMU_UART_DR];
 }

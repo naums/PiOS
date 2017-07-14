@@ -3,6 +3,8 @@
 #include <pios/gpio.h>
 #include <pios/timer.h>
 
+#include "source/xmodem.h"
+
 #include <pios/irq.h>
 
 #include "pios_port_config.h"
@@ -86,10 +88,24 @@ void __attribute__ ((noreturn)) blinkloop()
  
 int main ()
 {    
-    pios_uart_init();
+    pios_xmodem_init();
     pios_uart_puts("\r\nHello Lads!\r\n\0");
 
-	pios_jtag_init();
+	//pios_jtag_init();
+	
+	pios_xmodem_signal ( PIOS_XMODEM_NAK );
+	uint8_t lastBlock=0;
+    int x = 0x80000;
+    while (x > 0)
+        x--;
+	uint8_t data[128];
+	while ( pios_xmodem_read ( data, &lastBlock ) != 1 )
+	{
+	    int x = 0x80000;
+	    while (x > 0)
+            x--;
+	    pios_xmodem_signal ( PIOS_XMODEM_NAK );
+	}
 
     /*pios_gpio_pinmode ( 2, PIOS_GPIO_OUTPUT );
     

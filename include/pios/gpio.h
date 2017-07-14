@@ -112,5 +112,11 @@ void pios_gpio_write ( uint32_t pin, uint32_t val );
  * \return NONE
  **/
 void pios_gpio_pinmode ( uint32_t pin, uint32_t val );
+/**
+ * \brief read the mode of the pin and return it
+ * \param pin the pin to be read
+ * \return the current mode of the pin
+ **/
+int pios_gpio_getPinmode ( uint32_t pin );
 
 #endif

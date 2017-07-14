@@ -133,3 +133,21 @@ void pios_gpio_pinmode ( uint32_t pin, uint32_t val )
     v |= (val << ((pin<<1) + pin));
     *base = v;
 }
+
+int pios_gpio_getPinmode ( uint32_t pin )
+{
+    if ( pin > 53 ) 
+        return;
+    
+    volatile uint32_t *base = &pios_gpio->fn_select[0];
+    while ( pin >= 10 )
+    {
+        base++;
+        pin-=10;
+    }
+    
+    uint32_t v = *base;
+    v = v >> ((pin<<1)+pin) ;
+    v &= 7;    /// move the 7 pin*3 times, so it masks the correct bits
+    return v;
+}

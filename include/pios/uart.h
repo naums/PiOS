@@ -15,6 +15,10 @@
 #include <stdbool.h>
 
 /**
+ * \brief checks the current function of the UART-GPIO-Pins and returns whether they are correctly set or not
+ **/
+bool pios_uart_checkPins ();
+/**
  * \brief initiate the miniUART of the AUX-peripheral
  **/
 void pios_uart_init ( );

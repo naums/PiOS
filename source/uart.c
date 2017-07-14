@@ -98,6 +98,16 @@ void pios_uart_init ( )
     pios_aux[AUX_MU_CNTL] = 3;
 }
 
+bool pios_uart_checkPins ()
+{
+    if ( pios_gpio_getPinmode ( 14 ) == PIOS_GPIO_ALT5  && 
+         pios_gpio_getPinmode ( 15 ) == PIOS_GPIO_ALT5 )
+    {
+        return true;
+    }
+    return false;
+}
+
 void pios_uart_puts ( const char* str )
 {
     while ( *str )
@@ -141,6 +151,16 @@ uint32_t pios_uart_getchar ( )
     }
     return (0xff & pios_aux[AUX_MU_IO]);
 }
+
+int pios_uart_getchar_asynch ( uint8_t* data )
+{
+    if ((pios_aux[AUX_MU_LSR] & AUX_RX_DATA) != 0 ) 
+    {
+        *data = (0xff & pios_aux[AUX_MU_IO]);
+        return 0;
+    }
+    return -1;
+}   
 
 void pios_uart_setBaud ( uint32_t baud )
 {

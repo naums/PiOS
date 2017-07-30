@@ -3,8 +3,8 @@ SOURCE=source/
 BUILD=build/
 LIB=lib/
 
-# TODO: copy the correct board.mk to the main-folder
-include board.mk
+BOARD=rpi0
+include boards/$(BOARD)/board.mk
 
 # COMPILERS and stuff 
 PLATFORM ?= arm-none-eabi
@@ -27,7 +27,7 @@ CPUINFO=-mcpu=$(CPU) -mfpu=vfp #-march=armv6
 ASOPTS=-g $(CPUINFO)
 LIBS=-lpios -lc -lm -lgcc #-lyailfc
 LDOPTS=$(LIBS)
-CFLAGS=-std=c99 -Wall -pedantic -g $(CPUINFO) -marm -mfloat-abi=hard -I$(INC) -Os #-mcpu=arm1176jzf-s
+CFLAGS=-std=c99 -Wall -pedantic -g $(CPUINFO) -marm -mfloat-abi=hard -I$(INC) -Iboards/$(BOARD)/ -Os #-mcpu=arm1176jzf-s
 
 # exclude the following file for building the library
 LIBEXCLUDE=$(BUILD)main.o\
@@ -99,7 +99,7 @@ $(KRNL).img: $(KRNL).elf
 	$(OBJCOPY) $(KRNL).elf -O binary $(KRNL).img
 	
 $(KRNL).elf: $(OBJECTS) $(LIB)libpios.a	$(LIBC)
-	$(LD) --no-undefined $(OBJECTS) $(LDOPTS) -Map $(KRNL).map -o $(KRNL).elf -L $(LIB) -L $(ARMGCCLIBPATH) -T $(LDSCRIPT)
+	$(LD) --no-undefined $(OBJECTS) $(LDOPTS) -Map $(KRNL).map -o $(KRNL).elf -L $(LIB) -L $(ARMGCCLIBPATH) -T boards/$(BOARD)/kernel.ld
 
 # build objectfiles from assembler or c
 $(BUILD)%.o: $(SOURCE)%.s

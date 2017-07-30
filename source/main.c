@@ -1,14 +1,9 @@
 #include <pios/uart.h>
-#include <pios/lcd.h>
 #include <pios/gpio.h>
-#include <pios/timer.h>
-
-#include "source/xmodem.h"
+#include <pios/mmu.h>
 
 #include <pios/irq.h>
-
 #include "pios_port_config.h"
-
 #include <stdio.h>
 
 #define pc pios_uart_putchar
@@ -88,32 +83,40 @@ void __attribute__ ((noreturn)) blinkloop()
  
 int main ()
 {    
-    pios_xmodem_init();
     pios_uart_puts("\r\nHello Lads!\r\n\0");
 
-	//pios_jtag_init();
-	
-	pios_xmodem_signal ( PIOS_XMODEM_NAK );
-	uint8_t lastBlock=0;
-    int x = 0x80000;
-    while (x > 0)
-        x--;
-	uint8_t data[128];
-	while ( pios_xmodem_read ( data, &lastBlock ) != 1 )
-	{
-	    int x = 0x80000;
-	    while (x > 0)
-            x--;
-	    pios_xmodem_signal ( PIOS_XMODEM_NAK );
-	}
+    uint32_t* ptr = 0x0001234;
+    for ( int i = 0; i<=4; i++ )
+    {
+        *ptr = ptr;
+        ptr+=0x00100000;
+    }
+    
+    ptr = 0x0001234;
+    for ( int i = 0; i<=4; i++ )
+    {
+        printNum ( *ptr, 16, 8 );
+        ptr+=0x00100000;
+    }
+    
+    printf ("\nEnable MMU\n");
+    
+    ptr=0x00000000;
+    for ( int i = 0; i<=4; i++ )
+    {
+        pios_mmu_section ( ptr, ptr, PIOS_MMU_CACHE | PIOS_MMU_BUFFER );
+    }
+    
+    pios_mmu_init();
+    pios_mmu_enable ( PIOS_CONTROL_M | PIOS_CONTROL_U | PIOS_CONTROL_I | PIOS_CONTROL_Z | PIOS_CONTROL_C );
+    
+    ptr = 0x0001234;
+    for ( int i = 0; i<=4; i++ )
+    {
+        printNum ( *ptr, 16, 8 );
+        ptr+=0x00100000;
+    }
 
-    /*pios_gpio_pinmode ( 2, PIOS_GPIO_OUTPUT );
-    
-    pios_arm_timer_setLoad ( 0x2000 );
-    pios_arm_timer_init ( true, PIOS_ARM_TIMER_PRESCALE_256, true );
-    
-    PIOS_ARM_TIMER_INTERRUPT_ENABLE();
-    */
     blinkloop();
     
     //while ( 1 ) ;

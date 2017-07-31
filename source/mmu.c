@@ -8,6 +8,16 @@
 
 #include <pios/mmu.h>
 
+void pios_mmu_scrap_table ()
+{
+    uint32_t* ptr = (uint32_t*) PIOS_MMU_TABLE_BASE;
+    while ( (uint32_t)ptr < PIOS_MMU_TABLE_BASE + 0x4000 )
+    {
+        *ptr = 0;
+        ptr++;
+    }
+}
+
 /**
  * \brief initialise the MMU
  **/
@@ -27,8 +37,10 @@ void pios_mmu_init ()
         "mcr p15,0,r1,c3,c0,0\n"
         
         // set the translation table base address (remember to align 16 KiB!)
-        "mcr p15,0,r0,c2,c0,0\n"
-    );
+        "mcr p15,0,%0,c2,c0,0\n"
+    :
+    : "r" (PIOS_MMU_TABLE_BASE)
+    : "r1");
 }
 
 /**
@@ -40,7 +52,9 @@ void pios_mmu_enable ( uint32_t flags )
         "mrc p15,0,r0,c1,c0,0\n"
         "orr r0,r0,%0\n"
         "mcr p15,0,r0,c1,c0,0\n"
-    : "=r" ( flags ));
+    :
+    : "r" ( flags )
+    : "r0" );
 }
 
 /**
@@ -74,9 +88,9 @@ void pios_mmu_invalidate_tlb ()
 void pios_mmu_domain ( uint32_t domain )
 {
     __asm volatile (
-        "mov r0, #0\n"
-        "mcr p15, 0, r0, c3, c0, 0\n"
-    );
+        "mcr p15, 0, %0, c3, c0, 0\n"
+    :
+    : "r" (domain));
 }
 
 /**
@@ -92,6 +106,20 @@ uint32_t pios_mmu_getDomain ()
 }
 
 /**
+ * \brief return the value written in the first level descriptor table
+ * \param[in] virtual the virtual address for the entry
+ * \return the entry of the first level address conversion table for the specified virtual address
+ **/
+uint32_t pios_mmu_getSection ( uint32_t virtual )
+{
+    uint32_t offset = virtual >> 20;
+    // plus and or are the same thing here, as MMUTABLEBASE is 14 bit aligned
+    uint32_t* entry = (uint32_t*) (PIOS_MMU_TABLE_BASE | (offset<<2));
+    
+    return *entry;
+}
+
+/**
  * \brief creates an translation table entry (for sections of size 1 MiB)
  * \param[in] virtual the virtual address (only top 12 bits used)
  * \param[in] physical the physical address (only top 12 bits used)
@@ -104,7 +132,7 @@ uint32_t pios_mmu_section ( uint32_t virtual, uint32_t physical, uint32_t flags 
     uint32_t* entry = (uint32_t*) (PIOS_MMU_TABLE_BASE | (offset<<2));
     
     // mask lower 20 bits of physical address then ORR flags and 0x02 for 1 MiB
-    uint32_t physval = (physical & 0xfff00000) | (flags & 0x7ffa) | 0x02; 
+    uint32_t physval = (physical & 0xfff00000) | (flags & 0x7ffc) | 0x02; 
 
     *entry = physval;
     return(0);

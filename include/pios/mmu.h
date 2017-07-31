@@ -15,11 +15,6 @@
 /// the base address of our MMU first level table
 #define PIOS_MMU_TABLE_BASE 0x4000
 
-/// flag for marking a section bufferable (write-cache)
-#define PIOS_MMU_BUFFER 0x04
-/// flag for marking a section cacheable (read-cache)
-#define PIOS_MMU_CACHE 0x08
-
 /// enable force AP functionality in the MMU that generates Access Bit Faults
 #define PIOS_CONTROL_FA (1<<29)
 /// enable the TEX remap functionality of the MMU
@@ -53,6 +48,16 @@
 /// enable the MMU
 #define PIOS_CONTROL_M   (1<<0)
 
+#define PIOS_MMU_DOMAIN_NOACCESS (0x0 << 5)
+#define PIOS_MMU_DOMAIN_CLIENT   (0x1 << 5)
+#define PIOS_MMU_DOMAIN_MANAGER  (0x3 << 5)
+/// flag for marking a section bufferable (write-cache)
+#define PIOS_MMU_BUFFER (1 << 2)
+/// flag for marking a section cacheable (read-cache)
+#define PIOS_MMU_CACHE (1 << 3)
+
+void pios_mmu_scrap_table ();
+
 /**
  * \brief initialise the MMU, but not enable the MMU yet
  **/
@@ -77,6 +82,14 @@ void pios_mmu_domain ( uint32_t domain );
  * \brief returns the current domain-settings
  **/
 uint32_t pios_mmu_getDomain ();
+
+/**
+ * \brief return the value written in the first level descriptor table
+ * \param[in] virtual the virtual address for the entry
+ * \return the entry of the first level address conversion table for the specified virtual address
+ **/
+uint32_t pios_mmu_getSection ( uint32_t virtual );
+
 /**
  * \brief creates an translation table entry (for sections of size 1 MiB)
  * \param[in] virtual the virtual address (only top 12 bits used)

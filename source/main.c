@@ -85,35 +85,46 @@ int main ()
 {    
     pios_uart_puts("\r\nHello Lads!\r\n\0");
 
-    uint32_t* ptr = 0x0001234;
+    uint8_t* ptr = (void*)0x0001234;
+    uint32_t* p;
     for ( int i = 0; i<=4; i++ )
     {
-        *ptr = ptr;
+        p = (uint32_t*)ptr;
+        *p = (uint32_t)p;
         ptr+=0x00100000;
     }
     
-    ptr = 0x0001234;
+    ptr = (void*)0x0001234;
     for ( int i = 0; i<=4; i++ )
     {
-        printNum ( *ptr, 16, 8 );
+        p = (uint32_t*)ptr;
+        printNum ( *p, 16, 8 );
         ptr+=0x00100000;
     }
+    pios_mmu_scrap_table ();
+    pios_uart_puts ("\nEnable MMU\n");
     
-    printf ("\nEnable MMU\n");
-    
-    ptr=0x00000000;
-    for ( int i = 0; i<=4; i++ )
+    // set all sections to 1:1 virtual = physical translation, no cache, no buffers
+    for ( uint32_t sections = 0 ; ; sections += 0x00100000 )
     {
-        pios_mmu_section ( ptr, ptr, PIOS_MMU_CACHE | PIOS_MMU_BUFFER );
+        pios_mmu_section ( sections, sections, 0 );
+        if ( sections == 0x0fff00000 ) 
+            break;        
     }
+    
+    pios_mmu_section ( 0x00100000, 0x00300000, 0 );
+    pios_mmu_section ( 0x00200000, 0x00100000, 0 );
+    pios_mmu_section ( 0x00300000, 0x00200000, 0 );
     
     pios_mmu_init();
-    pios_mmu_enable ( PIOS_CONTROL_M | PIOS_CONTROL_U | PIOS_CONTROL_I | PIOS_CONTROL_Z | PIOS_CONTROL_C );
+    pios_mmu_enable ( PIOS_CONTROL_M  );
+    pios_uart_puts ("\nEnabled MMU\n");
     
-    ptr = 0x0001234;
+    ptr = (void*)0x0001234;
     for ( int i = 0; i<=4; i++ )
     {
-        printNum ( *ptr, 16, 8 );
+        p = (uint32_t*)ptr;
+        printNum ( *p, 16, 8 );
         ptr+=0x00100000;
     }
 

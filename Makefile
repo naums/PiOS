@@ -64,7 +64,7 @@ lib: $(BUILD) $(LIB)libpios.a
 newlib: $(BUILD) $(LIBC)
 $(LIB)build/arm-none-eabi/newlib/libc.a: 
 	cd $(LIB)build && \
-		CFLAGS_FOR_TARGET="$(NEWLIB_CFLAGS)\
+		CFLAGS_FOR_TARGET="$(NEWLIB_CFLAGS)" \
 		../$(NEWLIB_PATH)/configure $(NEWLIB_OPTS) && \
 		$(MAKE) 
 

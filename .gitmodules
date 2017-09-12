@@ -1,6 +1,3 @@
 [submodule "lib/newlib-cygwin"]
 	path = lib/newlib-cygwin
 	url = git://sourceware.org/git/newlib-cygwin.git
-[submodule "lib/yailfc"]
-	path = lib/yailfc
-	url = https://github.com/naums/yailfc.git

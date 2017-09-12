@@ -1,9 +1,10 @@
 #include <stdint.h>
 #include <stdbool.h>
-#include "xmodem.h"
-#include <stdio.h>
+#include "pios/xmodem.h"
 
-#define pc putchar
+#define pc pios_uart_putchar
+#define gc pios_uart_getchar
+#define puts pios_uart_puts
 
 enum xmodem_state
 {
@@ -57,6 +58,8 @@ int pios_xmodem_read ( uint8_t* input, size_t size )
                 return -PIOS_XMODEM_ENDOFTRANSMISSION;
             case PIOS_XMODEM_CANCEL:
                 return -PIOS_XMODEM_CANCEL;
+            default:
+                return retval;
         }
     }
     return retval;
@@ -73,7 +76,6 @@ int pios_xmodem_write ( uint8_t* output, size_t size )
         pkg->chksum = 0;
         
         // checksum-calculation
-        uint8_t* d = &pkg->data[0];
         for ( int i=0; i<128; i++)
         {
             pkg->chksum += pkg->data[i];
@@ -85,7 +87,7 @@ int pios_xmodem_write ( uint8_t* output, size_t size )
             pc ( *p );
             p++;
         }
-    
+        
         return sizeof ( struct pios_xmodem_pkg );
     }
     else
@@ -118,9 +120,8 @@ int pios_xmodem_getchar ( uint8_t input )
         return PIOS_XMODEM_CANCEL;
     }
     
-    if ( input == PIOS_XMODEM_EOT )
+    if ( input == PIOS_XMODEM_EOT && pios_xmodem_state == SOH )
     {   
-        pios_xmodem_init();
         return PIOS_XMODEM_ENDOFTRANSMISSION;
     }
     
@@ -136,7 +137,7 @@ int pios_xmodem_getchar ( uint8_t input )
             pios_xmodem_state = NBLOCK;
             if ( pios_xmodem_block == input )
             {
-                pios_xmodem_discard=true;
+                pios_xmodem_discard = true;
                 return PIOS_XMODEM_DUPLICATE;
             }
             
@@ -149,7 +150,7 @@ int pios_xmodem_getchar ( uint8_t input )
                 }
                 else
                 {
-                    pios_xmodem_discard=true;
+                    pios_xmodem_discard = true;
                     return PIOS_XMODEM_WRONGBLOCK;
                 }
             }
@@ -162,7 +163,7 @@ int pios_xmodem_getchar ( uint8_t input )
                 }
                 else
                 {
-                    pios_xmodem_discard=true;
+                    pios_xmodem_discard = true;
                 }
             }
         case NBLOCK:
@@ -187,7 +188,7 @@ int pios_xmodem_getchar ( uint8_t input )
                 pios_xmodem_dataSize--;
                 if ( pios_xmodem_dataSize == 0 )
                 {
-                    pios_xmodem_state=CHKSUM;
+                    pios_xmodem_state = CHKSUM;
                     return PIOS_XMODEM_DATAFIN;
                 }
                 return PIOS_XMODEM_READ_DATA;
@@ -215,6 +216,8 @@ int pios_xmodem_getchar ( uint8_t input )
             {
                 return PIOS_XMODEM_DISCARD;
             }
+        default: 
+            pios_xmodem_init();
     }
     
     return PIOS_XMODEM_READ_INVALID;

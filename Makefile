@@ -3,7 +3,7 @@ SOURCE=source/
 BUILD=build/
 LIB=lib/
 
-BOARD=rpi0
+BOARD=rpi
 include boards/$(BOARD)/board.mk
 
 # COMPILERS and stuff 
@@ -25,9 +25,9 @@ CPU?=arm1176jzf-s
 INC=include
 CPUINFO=-mcpu=$(CPU) -mfpu=vfp #-march=armv6
 ASOPTS=-g $(CPUINFO)
-LIBS=-lpios -lc -lm -lgcc #-lyailfc
-LDOPTS=$(LIBS)
-CFLAGS=-std=c99 -Wall -pedantic -g $(CPUINFO) -marm -mfloat-abi=hard -I$(INC) -Iboards/$(BOARD)/ -Os #-mcpu=arm1176jzf-s
+LIBS=-lpios -lgcc #-lyailfc
+LDOPTS=$(LIBS) --gc-sections
+CFLAGS=-std=c99 -Wall -pedantic -g $(CPUINFO) -marm -mfloat-abi=hard -I$(INC) -Iboards/$(BOARD)/ -fdata-sections -Os #-mcpu=arm1176jzf-s
 
 # exclude the following file for building the library
 LIBEXCLUDE=$(BUILD)main.o\

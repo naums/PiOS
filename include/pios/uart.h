@@ -84,4 +84,6 @@ int pios_uart_txQueue ();
  **/
 void pios_uart_flush ();
 
+void pios_uart_clearQueues ();
+
 #endif

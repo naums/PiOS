@@ -92,8 +92,15 @@ void pios_uart_init ( )
        * see: Manual pg 101
     **/
 
-    uint32_t p[2] = { (1<<14)|(1<<15), 0 };
-    pios_gpio_pullBulk ( p, PIOS_GPIO_PULL_OFF );
+    //uint32_t p[2] = { (1<<15)|(1<<14), 0 };
+    //pios_gpio_pullBulk ( p, PIOS_GPIO_PULL_OFF );
+    
+    uint32_t ra;
+    pios_gpio->pullControlEnable = 0;
+    for(ra=0;ra<150;ra++)  pios_wasteCycles(ra);
+    pios_gpio->pullControlClock[0] = (1<<14) | (1<<15);
+    for(ra=0;ra<150;ra++)  pios_wasteCycles(ra);
+    pios_gpio->pullControlClock[0] = 0;
     
     pios_aux[AUX_MU_CNTL] = 3;
 }
@@ -148,6 +155,10 @@ uint32_t pios_uart_getchar ( )
     {
         if ((pios_aux[AUX_MU_LSR] & AUX_RX_DATA) != 0 ) 
             break;
+        pios_gpio_write ( PIOS_IO_ACT_LED, PIOS_GPIO_LOW );
+        wait(1);
+        pios_gpio_write ( PIOS_IO_ACT_LED, PIOS_GPIO_HIGH );
+        wait(1);
     }
     return (0xff & pios_aux[AUX_MU_IO]);
 }
@@ -192,6 +203,11 @@ int pios_uart_rxQueue ()
 int pios_uart_txQueue ()
 {
     return (((0x000f0000) & pios_aux[AUX_MU_STAT]) >> 16);
+}
+
+void pios_uart_clearQueues ()
+{
+    pios_aux[AUX_MU_IO] = 0x06;
 }
 
 #endif

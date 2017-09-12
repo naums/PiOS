@@ -1,12 +1,9 @@
-#include <pios/uart.h>
-#include <pios/gpio.h>
-#include <pios/mmu.h>
-
-#include <pios/irq.h>
-#include "pios_port_config.h"
-#include <stdio.h>
+#include "pios/xmodem.h"
+#include "pios/uart.h"
 
 #define pc pios_uart_putchar
+#define gc pios_uart_getchar
+#define puts pios_uart_puts
 
 uint32_t printNum ( uint32_t num, uint32_t base, uint32_t length )
 {
@@ -55,80 +52,74 @@ uint32_t printNum ( uint32_t num, uint32_t base, uint32_t length )
         }
     }
     pc('\n');
+    pc('\r');
     return length;
 }
 
-
-int _write ( int fd, const char* ptr, size_t size )
+const char* strings[] =
 {
-    size_t i=0;
-    for ( ; i<size; i++ )
-    {
-        pc( ptr[i] );
-    }
-    return i;
-}
+    "CANCEL",
+    "BLOCKACK",
+    "BLOCKFIN",
+    "ENDOFTRANSMISSION",
+    "READ_SOH",
+    "READ_BLOCK",
+    "READ_NBLOCK",
+    "READ_DATA",
+    "DATAFIN",
+    "READ_CHKSUM",
+    "READ_INVALID",
+    "WRONGBLOCK",
+    "DUPLICATE",
+    "CHKSUMFAIL",
+    "DISCARD",
+    "UNKNOWN"
+};
 
-void __attribute__ ((noreturn)) blinkloop() 
+uint8_t data[256] = {0};
+
+int main ( int argc, char** argv )
 {
-    pios_gpio_pinmode ( PIOS_IO_ACT_LED, PIOS_GPIO_OUTPUT );
-    while ( 1 )
+    pios_uart_init();
+    pios_uart_setBaud ( 115200 );
+    pios_xmodem_init();
+    
+    uint8_t* ptr = data;
+    printNum ( ptr, 16, 8 );
+    pios_xmodem_signal ( PIOS_XMODEM_NAK );
+    while (1)
     {
-        pios_gpio_write ( PIOS_IO_ACT_LED, PIOS_GPIO_LOW );
-        wait(1);
-        pios_gpio_write ( PIOS_IO_ACT_LED, PIOS_GPIO_HIGH );
-        wait(1);
-    }
-}
- 
-int main ()
-{    
-    pios_uart_puts("\r\nHello Lads!\r\n\0");
+        uint32_t c = gc ();
+        int retval = pios_xmodem_getchar ( (char)c );
+        pc ( c );
+        puts(" -- ");
+        printNum ( (char)c, 16, 2 );
 
-    uint8_t* ptr = (void*)0x0001234;
-    uint32_t* p;
-    for ( int i = 0; i<=4; i++ )
-    {
-        p = (uint32_t*)ptr;
-        *p = (uint32_t)p;
-        ptr+=0x00100000;
+        switch ( retval )
+        {
+            case PIOS_XMODEM_ENDOFTRANSMISSION:
+                pios_xmodem_signal ( PIOS_XMODEM_ACK );
+                pios_xmodem_init ();
+                goto down;
+                break;
+            case PIOS_XMODEM_BLOCKFIN:
+                pios_xmodem_signal ( PIOS_XMODEM_ACK );
+                pios_xmodem_copyBlock ( ptr );
+                ptr+=128;
+                break;
+        }        
     }
-    
-    ptr = (void*)0x0001234;
-    for ( int i = 0; i<=4; i++ )
+down:
+    for ( int i = 0; i<256; i++ )
     {
-        p = (uint32_t*)ptr;
-        printNum ( *p, 16, 8 );
-        ptr+=0x00100000;
-    }
-    pios_mmu_scrap_table ();
-    pios_uart_puts ("\nEnable MMU\n");
+        pc ( data[i] );
+    }   
+    puts ("\n\r\nFIN!\n\r");
     
-    // set all sections to 1:1 virtual = physical translation, no cache, no buffers
-    for ( uint32_t sections = 0 ; ; sections += 0x00100000 )
+    while (1)
     {
-        pios_mmu_section ( sections, sections, 0 );
-        if ( sections == 0x0fff00000 ) 
-            break;        
-    }
-    
-    pios_mmu_section ( 0x00100000, 0x00300000, 0 );
-    pios_mmu_section ( 0x00200000, 0x00100000, 0 );
-    pios_mmu_section ( 0x00300000, 0x00200000, 0 );
-    
-    pios_mmu_init();
-    pios_mmu_enable ( PIOS_CONTROL_M  );
-    pios_uart_puts ("\nEnabled MMU\n");
-    
-    ptr = (void*)0x0001234;
-    for ( int i = 0; i<=4; i++ )
-    {
-        p = (uint32_t*)ptr;
-        printNum ( *p, 16, 8 );
-        ptr+=0x00100000;
-    }
-
-    blinkloop();
-    
-    //while ( 1 ) ;
+        puts("UPS");
+    }   
 }
+
+

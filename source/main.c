@@ -80,10 +80,42 @@ void __attribute__ ((noreturn)) blinkloop()
         wait(1);
     }
 }
+
+void p1 ()
+{
+    pios_uart_puts ("p1\n\0");
+    for ( int i =0; i<256; i++ )
+    {
+        printNum ( i, 16, 4 );
+        pios_dump_registers();
+        pios_switch();
+        for ( int x =0; x<0x7fffffff; x++);
+    }
+}
+
+void p2 ()
+{
+    pios_uart_puts ("p2\n\0");
+    while (1);
+    for ( int i = 0x0100; i<0xff00; i+=256 )
+    {
+        printNum ( i, 16, 4 );
+        pios_switch();
+        pios_dump_registers(); 
+        for ( int x =0; x<0x7fffffff; x++);
+    }
+}
  
 int main ()
 {    
-    pios_uart_puts("\r\nHello Lads!\r\n\0");
+    pios_fork ( p1, 0x2000 );
+    pios_fork ( p2, 0x3000 );
+    
+    p1();
+
+    while ( 1 );
+    
+    /*pios_uart_puts("\r\nHello Lads!\r\n\0");
 
     uint8_t* ptr = (void*)0x0001234;
     uint32_t* p;
@@ -130,5 +162,5 @@ int main ()
 
     blinkloop();
     
-    //while ( 1 ) ;
+    //while ( 1 ) ;*/
 }

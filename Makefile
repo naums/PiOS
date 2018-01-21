@@ -3,7 +3,7 @@ SOURCE=source/
 BUILD=build/
 LIB=lib/
 
-BOARD=rpi0
+BOARD=qemu
 include boards/$(BOARD)/board.mk
 
 # COMPILERS and stuff 
@@ -25,70 +25,24 @@ CPU?=arm1176jzf-s
 INC=include
 CPUINFO=-mcpu=$(CPU) -mfpu=vfp #-march=armv6
 ASOPTS=-g $(CPUINFO)
-LIBS=-lpios -lc -lm -lgcc #-lyailfc
+LIBS=-lgcc
 LDOPTS=$(LIBS)
 CFLAGS=-std=c99 -Wall -pedantic -g $(CPUINFO) -marm -mfloat-abi=hard -I$(INC) -Iboards/$(BOARD)/ -Os #-mcpu=arm1176jzf-s
-
-# exclude the following file for building the library
-LIBEXCLUDE=$(BUILD)main.o\
-           $(BUILD)cpu_exception.o\
-           $(BUILD)start.o\
-           $(BUILD)qemu_start.o\
-           $(BUILD)syscalls.o
-
-LIBC=lib/libc.a
-LIBM=lib/libm.a
-NEWLIB_PATH=newlib-cygwin
-NEWLIB=$(LIB)$(NEWLIB_PATH)
-NEWLIB_PREP=$(NEWLIB)/newlib/libc/sys/arm/
-
-NEWLIB_CFLAGS?=$(CPUINFO) $(CCPU)
-NEWLIB_OPTS?=--target=arm-none-eabi --enable-newlib-hw-fp --with-float=hard --with-cpu=arm1176jzf-s --with-fpu=vfp --disable-multilib --disable-shared --enable-target-optspace  --disable-newlib-supplied-syscalls
 
 # KERNELNAME
 KRNL=kernel
 LDSCRIPT?=$(KRNL).ld
 
 # gather all s and c files
-OBJECTS := $(patsubst $(SOURCE)%.s,$(BUILD)%.o, $(patsubst $(SOURCE)%.c,$(BUILD)%.o, $(wildcard $(SOURCE)*.c))) $(ASFILES)
-LIBOBJ := $(filter-out $(LIBEXCLUDE),$(OBJECTS))
-OBJECTS := $(filter-out $(LIBOBJ),$(OBJECTS))
+ASFILES += $(BUILD)process_low_s.o $(BUILD)string_s.o $(BUILD)stdio_s.o
+OBJECTS := $(patsubst $(SOURCE)%.s,$(BUILD)%_s.o, $(patsubst $(SOURCE)%.c,$(BUILD)%.o, $(wildcard $(SOURCE)*.c))) $(ASFILES)
+#LIBOBJ := $(filter-out $(LIBEXCLUDE),$(OBJECTS))
+#OBJECTS := $(filter-out $(LIBOBJ),$(OBJECTS))
 
 all: $(BUILD)  $(KRNL).img
 	
-lib: $(BUILD) $(LIB)libpios.a
+lib: $(BUILD) #$(LIB)libpios.a
 
-# build newlib
-# TARGET_CC="arm-none-eabi-gcc"
-# TARGET_AR="arm-none-eabi-ar"
-newlib: $(BUILD) $(LIBC)
-$(LIB)build/arm-none-eabi/newlib/libc.a: 
-	cd $(LIB)build && \
-		CFLAGS_FOR_TARGET="$(NEWLIB_CFLAGS)" \
-		../$(NEWLIB_PATH)/configure $(NEWLIB_OPTS) && \
-		$(MAKE) 
-
-$(LIBC): $(LIB)build/arm-none-eabi/newlib/libc.a
-	cp $(LIB)build/arm-none-eabi/newlib/libc.a $(LIBC)
-	cp $(LIB)build/arm-none-eabi/newlib/libm.a $(LIBM)
-
-newlib_clean:
-	rm -r $(LIB)build
-	mkdir $(LIB)build
-	rm $(LIBC) $(LIBM)
-
-yailfc:
-	cd $(LIB)yailfc && \
-		CPU="$(CPUINFO) $(CCPU)"\
-		PF="arm-none-eabi-" \
-		make lib
-	mv $(LIB)yailfc/libyailfc.a $(LIB)libyailfc.a
-
-yailfc_clean:
-	rm $(LIB)libyailfc.a
-	cd $(LIB)yailfc && \
-		make clean
-		
 # make a listing from the kernel.elf file
 dump: $(BUILD) $(KRNL).elf $(KRNL).list
 $(KRNL).list : $(KRNL).elf
@@ -98,11 +52,11 @@ $(KRNL).list : $(KRNL).elf
 $(KRNL).img: $(KRNL).elf
 	$(OBJCOPY) $(KRNL).elf -O binary $(KRNL).img
 	
-$(KRNL).elf: $(OBJECTS) $(LIB)libpios.a	$(LIBC)
+$(KRNL).elf: $(OBJECTS)
 	$(LD) --no-undefined $(OBJECTS) $(LDOPTS) -Map $(KRNL).map -o $(KRNL).elf -L $(LIB) -L $(ARMGCCLIBPATH) -T boards/$(BOARD)/kernel.ld
 
 # build objectfiles from assembler or c
-$(BUILD)%.o: $(SOURCE)%.s
+$(BUILD)%_s.o: $(SOURCE)%.s
 	$(AS) -I $(SOURCE) $(ASOPTS) $< -o $@
 $(BUILD)%.o: $(SOURCE)%.c
 	$(CC) -I $(SOURCE) -I $(LIB)yailfc/src -I. $(CFLAGS) $< -c -o $@

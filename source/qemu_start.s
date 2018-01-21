@@ -1,8 +1,8 @@
 .section ".init"
 
-.globl start
+.globl _start
 
-start:
+_start:
     ldr sp, =stack_top
     bl main
 
